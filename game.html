@@ -605,10 +605,41 @@
             .lineup-player { min-width: 90px; max-width: 110px; padding: 10px 4px; }
         }
         @media (max-width: 600px) {
-            .lineup-container { padding: 10px 1vw; }
-            .lineup-title { font-size: 0.8rem; }
-            .lineup-player { min-width: 70px; max-width: 90px; font-size: 0.7rem; }
+            .lineup-container {
+                transform: scale(0.8);
+                transform-origin: top center;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .lineup-container * {
+                font-size: 80% !important;
+            }
+            .lineup-title { font-size: 0.7rem; }
+            .lineup-player { min-width: 60px; max-width: 75px; font-size: 0.6rem; }
             .player-avatar { width: 24px; height: 24px; font-size: 0.7rem; }
+        }
+        @media (max-width: 400px) {
+            .lineup-container {
+                transform: scale(0.65);
+                transform-origin: top center;
+            }
+            .lineup-container * {
+                font-size: 65% !important;
+            }
+            .lineup-title { font-size: 0.6rem; }
+            .lineup-player { min-width: 48px; max-width: 60px; font-size: 0.5rem; }
+        }
+        @media (max-width: 450px) {
+            .lineup-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-start;
+                margin: 0 auto;
+                left: unset;
+                right: unset;
+                position: static;
+            }
         }
         
         /* Action Buttons */
@@ -1349,13 +1380,28 @@ https://cdn.jsdelivr.net/npm/dom-to-image@2.6.0/dist/dom-to-image.min.js
                 // Calculate player rating based on answer time and correctness
                 const playerRating = calculatePlayerRating(answerTime, isCorrect);
                 
-                // Get random player with that rating, excluding already owned players
-                const { data: players, error } = await supabase
-                    .from('mlb_players')
-                    .select('*')
-                    .gte('rating', playerRating - 5)
-                    .lte('rating', playerRating + 5)
-                    .not('id', 'in', `(${userLineup.map(p => p.id).join(',') || '0'})`);
+                let players, error;
+                
+                if (!isCorrect) {
+                    // For incorrect answers, get players with exactly rating 50
+                    const result = await supabase
+                        .from('mlb_players')
+                        .select('*')
+                        .eq('rating', 50)
+                        .not('id', 'in', `(${userLineup.map(p => p.id).join(',') || '0'})`);
+                    players = result.data;
+                    error = result.error;
+                } else {
+                    // For correct answers, use the rating range logic
+                    const result = await supabase
+                        .from('mlb_players')
+                        .select('*')
+                        .gte('rating', playerRating - 5)
+                        .lte('rating', playerRating + 5)
+                        .not('id', 'in', `(${userLineup.map(p => p.id).join(',') || '0'})`);
+                    players = result.data;
+                    error = result.error;
+                }
                 
                 if (error || !players || players.length === 0) {
                     console.error('Error fetching players:', error);
@@ -1388,6 +1434,12 @@ https://cdn.jsdelivr.net/npm/dom-to-image@2.6.0/dist/dom-to-image.min.js
         
         // Calculate player rating based on answer time and correctness
         function calculatePlayerRating(answerTime, isCorrect) {
+            // If answer is incorrect, always return rating 50
+            if (!isCorrect) {
+                return 50;
+            }
+            
+            // For correct answers, use time-based rating logic
             if (answerTime <= 10) {
                 // 90-99
                 return Math.floor(Math.random() * 10) + 90;
@@ -1885,19 +1937,39 @@ https://cdn.jsdelivr.net/npm/dom-to-image@2.6.0/dist/dom-to-image.min.js
                                 fetch(dataUrl)
                                     .then(res => res.blob())
                                     .then(blob => {
-                                        const file = new File([blob], 'lineup.png', { type: blob.type });
+                                        const file = new File([blob], 'nineup-lineup.png', { type: blob.type });
                                         navigator.share({
                                             files: [file],
-                                            title: 'Check out my MLB Trivia Lineup!',
-                                            text: 'Here is my lineup and score from today\'s MLB Trivia!'
+                                            title: 'My NineUp MLB Trivia Lineup',
+                                            text: 'Here is my lineup from today\'s NineUp trivia game! Check out today\'s game here: nineupgame.com'
+                                        }).catch(err => {
+                                            console.log('Share failed:', err);
+                                            // Fallback to manual options
+                                            document.getElementById('share-options').style.display = 'block';
                                         });
                                     });
                                 document.getElementById('share-options').style.display = 'none';
                             } else {
                                 document.getElementById('share-options').style.display = 'block';
-                                const text = encodeURIComponent('Check out my MLB Trivia Lineup!');
-                                document.getElementById('whatsapp-share').href = `https://wa.me/?text=${text}`;
-                                document.getElementById('email-share').href = `mailto:?subject=My MLB Trivia Lineup&body=${text}`;
+                                const text = encodeURIComponent('Here is my lineup from today\'s NineUp trivia game! Check out today\'s game here: nineupgame.com');
+                                
+                                // For WhatsApp, we'll provide the text and image separately since WhatsApp Web API has limitations
+                                document.getElementById('whatsapp-share').onclick = function(e) {
+                                    e.preventDefault();
+                                    // Copy the text to clipboard
+                                    navigator.clipboard.writeText('Here is my lineup from today\'s NineUp trivia game! Check out today\'s game here: nineupgame.com').then(() => {
+                                        // Download the image
+                                        const downloadLink = document.createElement('a');
+                                        downloadLink.href = dataUrl;
+                                        downloadLink.download = 'nineup-lineup.png';
+                                        downloadLink.click();
+                                        
+                                        // Show instructions
+                                        alert('Image downloaded! The message has been copied to your clipboard. Open WhatsApp and paste the message, then attach the downloaded image.');
+                                    });
+                                };
+                                
+                                document.getElementById('email-share').href = `mailto:?subject=My NineUp MLB Trivia Lineup&body=${text}`;
                                 const downloadLink = document.getElementById('download-share');
                                 downloadLink.href = dataUrl;
                             }

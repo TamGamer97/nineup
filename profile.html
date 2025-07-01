@@ -750,23 +750,52 @@
                     const dailyLineups = userData.lineups[0].daily_lineups || {};
                     numLineups = Object.keys(dailyLineups).length;
                     // Badge logic
-                    if (numLineups <= 18) {
-                        badgeTier = 'Bronze I';
-                    } else if (numLineups <= 20) {
-                        badgeTier = 'Bronze II';
-                    } else if (numLineups <= 22) {
-                        badgeTier = 'Bronze III';
-                    } else if (numLineups <= 24) {
-                        badgeTier = 'Silver I';
-                    } else if (numLineups <= 26) {
-                        badgeTier = 'Silver II';
-                    } else if (numLineups <= 28) {
-                        badgeTier = 'Silver III';
+                    let badgeIcon = '';
+                    if (numLineups === 0) {
+                        badgeTier = 'Bronze I'; badgeIcon = '🥉';
+                    } else if (numLineups < 18) {
+                        badgeTier = 'Bronze I'; badgeIcon = '🥉';
+                    } else if (numLineups < 20) {
+                        badgeTier = 'Bronze II'; badgeIcon = '🥉';
+                    } else if (numLineups < 22) {
+                        badgeTier = 'Bronze III'; badgeIcon = '🥉';
+                    } else if (numLineups < 24) {
+                        badgeTier = 'Silver I'; badgeIcon = '🥈';
+                    } else if (numLineups < 26) {
+                        badgeTier = 'Silver II'; badgeIcon = '🥈';
+                    } else if (numLineups < 28) {
+                        badgeTier = 'Silver III'; badgeIcon = '🥈';
+                    } else if (numLineups < 30) {
+                        badgeTier = 'Gold I'; badgeIcon = '🥇';
+                    } else if (numLineups < 32) {
+                        badgeTier = 'Gold II'; badgeIcon = '🥇';
+                    } else if (numLineups < 34) {
+                        badgeTier = 'Gold III'; badgeIcon = '🥇';
+                    } else if (numLineups < 36) {
+                        badgeTier = 'Platinum I'; badgeIcon = '💎';
+                    } else if (numLineups < 38) {
+                        badgeTier = 'Platinum II'; badgeIcon = '💎';
+                    } else if (numLineups < 40) {
+                        badgeTier = 'Platinum III'; badgeIcon = '💎';
+                    } else if (numLineups < 42) {
+                        badgeTier = 'All-Star I'; badgeIcon = '⭐';
+                    } else if (numLineups < 44) {
+                        badgeTier = 'All-Star II'; badgeIcon = '⭐';
+                    } else if (numLineups < 46) {
+                        badgeTier = 'All-Star III'; badgeIcon = '⭐';
+                    } else if (numLineups < 48) {
+                        badgeTier = 'MVP I'; badgeIcon = '👑';
+                    } else if (numLineups < 50) {
+                        badgeTier = 'MVP II'; badgeIcon = '👑';
+                    } else if (numLineups < 52) {
+                        badgeTier = 'MVP III'; badgeIcon = '👑';
                     } else {
-                        badgeTier = 'Hall of Fame';
+                        // Hall of Fame with infinite progression
+                        const hallOfFameLevel = Math.floor((numLineups - 52) / 2) + 1;
+                        badgeTier = `Hall of Fame ${hallOfFameLevel}`; badgeIcon = '⚜️';
                     }
                 }
-                document.getElementById('stat-badge').textContent = badgeTier;
+                document.getElementById('stat-badge').innerHTML = `${badgeIcon} ${badgeTier}`;
             } else {
                 // Not logged in
                 const urlUsername = getProfileUsernameFromQuery();
@@ -922,7 +951,60 @@
                 playerCardsHtml = `<div style='color:#7f8c8d;font-size:0.9rem;text-align:center;'>No lineup found yet.</div>`;
             }
             document.getElementById('lineup-players').innerHTML = playerCardsHtml;
-            // TODO: Fetch and set stats, badge, etc. as before
+            
+            // Set badge tier based on number of lineups
+            let badgeTier = 'Bronze I';
+            let badgeIcon = '🥉';
+            if (userLineups && userLineups.length > 0) {
+                const dailyLineups = userLineups[0].daily_lineups || {};
+                const numLineups = Object.keys(dailyLineups).length;
+                
+                if (numLineups === 0) {
+                    badgeTier = 'Bronze I'; badgeIcon = '🥉';
+                } else if (numLineups < 18) {
+                    badgeTier = 'Bronze I'; badgeIcon = '🥉';
+                } else if (numLineups < 20) {
+                    badgeTier = 'Bronze II'; badgeIcon = '🥉';
+                } else if (numLineups < 22) {
+                    badgeTier = 'Bronze III'; badgeIcon = '🥉';
+                } else if (numLineups < 24) {
+                    badgeTier = 'Silver I'; badgeIcon = '🥈';
+                } else if (numLineups < 26) {
+                    badgeTier = 'Silver II'; badgeIcon = '🥈';
+                } else if (numLineups < 28) {
+                    badgeTier = 'Silver III'; badgeIcon = '🥈';
+                } else if (numLineups < 30) {
+                    badgeTier = 'Gold I'; badgeIcon = '🥇';
+                } else if (numLineups < 32) {
+                    badgeTier = 'Gold II'; badgeIcon = '🥇';
+                } else if (numLineups < 34) {
+                    badgeTier = 'Gold III'; badgeIcon = '🥇';
+                } else if (numLineups < 36) {
+                    badgeTier = 'Platinum I'; badgeIcon = '💎';
+                } else if (numLineups < 38) {
+                    badgeTier = 'Platinum II'; badgeIcon = '💎';
+                } else if (numLineups < 40) {
+                    badgeTier = 'Platinum III'; badgeIcon = '💎';
+                } else if (numLineups < 42) {
+                    badgeTier = 'All-Star I'; badgeIcon = '⭐';
+                } else if (numLineups < 44) {
+                    badgeTier = 'All-Star II'; badgeIcon = '⭐';
+                } else if (numLineups < 46) {
+                    badgeTier = 'All-Star III'; badgeIcon = '⭐';
+                } else if (numLineups < 48) {
+                    badgeTier = 'MVP I'; badgeIcon = '👑';
+                } else if (numLineups < 50) {
+                    badgeTier = 'MVP II'; badgeIcon = '👑';
+                } else if (numLineups < 52) {
+                    badgeTier = 'MVP III'; badgeIcon = '👑';
+                } else {
+                    // Hall of Fame with infinite progression
+                    const hallOfFameLevel = Math.floor((numLineups - 52) / 2) + 1;
+                    badgeTier = `Hall of Fame ${hallOfFameLevel}`; badgeIcon = '⚜️';
+                }
+            }
+            document.getElementById('stat-badge').innerHTML = `${badgeIcon} ${badgeTier}`;
+            
             document.getElementById('profile-loading-spinner').style.display = 'none';
             document.querySelector('.profile-container').style.visibility = 'visible';
         });
