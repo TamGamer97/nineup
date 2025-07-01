@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leaderboard - Daily Retro MLB Trivia</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Boogaloo&family=Roboto:wght@300;400;500;700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pacifico&display=swap');
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: 'Press Start 2P', 'Pacifico', cursive, sans-serif;
             background: #fff8f0;
@@ -25,6 +31,7 @@
             z-index: 1000;
             border-bottom: 1px solid rgba(255, 107, 53, 0.1);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            height: auto;
         }
         
         .nav-container {
@@ -45,7 +52,6 @@
             align-items: center;
             gap: 10px;
             transition: transform 0.3s ease;
-            cursor: pointer;
         }
         
         .logo:hover {
@@ -73,6 +79,10 @@
             backdrop-filter: blur(10px);
         }
         
+        .nav-links li {
+            position: relative;
+        }
+        
         .nav-links a {
             color: #2c3e50;
             text-decoration: none;
@@ -86,6 +96,23 @@
             position: relative;
             overflow: hidden;
             z-index: 1;
+        }
+        
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+            transition: left 0.5s;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .nav-links a:hover::before {
+            left: 100%;
         }
         
         .nav-links a:hover {
@@ -182,7 +209,7 @@
         }
         
         .leaderboard-content {
-            background: #fff;
+            background: none;
             border-radius: 24px;
             padding: 40px;
             box-shadow: 0 8px 32px rgba(255, 107, 53, 0.12);
@@ -279,12 +306,65 @@
             .leaderboard-content {
                 padding: 30px 20px;
             }
+            
+            .auth-buttons {
+                display: none !important;
+            }
+            
+            .mobile-auth-buttons {
+                display: flex !important;
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 10px;
+            }
         }
         
         @media (min-width: 769px) {
             .mobile-user-info {
                 display: none !important;
             }
+            .mobile-auth-buttons {
+                display: none !important;
+            }
+        }
+        
+        .weekly-leaderboard-table th, .weekly-leaderboard-table td {
+            text-align: center;
+            vertical-align: middle;
+            padding: 12px 8px;
+            font-family: 'Press Start 2P', cursive;
+        }
+        .weekly-leaderboard-table th {
+            background: #ffeaa7;
+            color: #2c3e50;
+            font-size: 1.1rem;
+            border-radius: 12px 12px 0 0;
+        }
+        .weekly-leaderboard-table td {
+            font-size: 1rem;
+        }
+        .weekly-leaderboard-table td.player-cell {
+            text-align: left;
+            padding-left: 18px;
+        }
+        .weekly-leaderboard-table tr {
+            transition: background 0.2s;
+        }
+        .weekly-leaderboard-table tr:hover {
+            background: #fff8f0 !important;
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #ffeaa7;
+            border-top: 4px solid #ff6b35;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
@@ -306,6 +386,10 @@
                 <li class="mobile-user-info" id="mobile-user-info">
                     <span class="mobile-username" id="mobile-username"></span>
                     <button class="mobile-logout-btn" id="mobile-logout-btn">Logout</button>
+                </li>
+                <li class="mobile-auth-buttons" id="mobile-auth-buttons" style="display:none;">
+                    <a href="registration.html" class="btn-login">Login</a>
+                    <a href="registration.html" class="btn-signup">Sign Up</a>
                 </li>
             </ul>
             
@@ -329,13 +413,21 @@
 
     <div class="leaderboard-container">
         <h1 class="leaderboard-title">🏆 Leaderboard</h1>
-        <div class="leaderboard-content">
-            <div class="leaderboard-message" id="leaderboard-message">Loading leaderboard...</div>
-            <div class="placeholder-content" id="placeholder-content" style="display:none;">
-                <p>🏅 Top players will appear here!</p>
-                <p>📊 Play games to climb the rankings</p>
-                <p>🎯 Compete with baseball fans worldwide</p>
-            </div>
+        <div class="weekly-leaderboard-header" id="weekly-leaderboard-header" style="text-align:center;margin-bottom:18px;font-family:'Press Start 2P',cursive;font-size:1.2rem;color:#ff6b35;"></div>
+        <div id="leaderboard-loading-spinner" class="loading-message" style="display:flex;justify-content:center;align-items:center;margin:32px 0;">
+            <div class="loading-spinner"></div>
+        </div>
+        <div class="weekly-leaderboard-table-wrapper" style="overflow-x:auto;">
+            <table class="weekly-leaderboard-table" id="weekly-leaderboard-table" style="width:100%;border-collapse:separate;border-spacing:0 12px;margin:0 auto;display:none;">
+                <thead>
+                    <tr style="font-size:1.1rem;background:linear-gradient(90deg,#ffeaa7,#fff8f0);color:#2c3e50;">
+                        <th style="padding:12px 8px;border-radius:12px 0 0 12px;">Rank</th>
+                        <th style="padding:12px 8px;">Player</th>
+                        <th style="padding:12px 8px;border-radius:0 12px 12px 0;">Total Score</th>
+                    </tr>
+                </thead>
+                <tbody id="weekly-leaderboard-body"></tbody>
+            </table>
         </div>
     </div>
     
@@ -355,8 +447,8 @@
         
         supabase.auth.getUser().then(({ data }) => {
             if (data && data.user) {
-                // Hide auth buttons and show user info
                 document.querySelector('.auth-buttons').style.display = 'none';
+                document.getElementById('mobile-auth-buttons').style.visibility = 'hidden';
                 const username = data.user.user_metadata?.display_name || data.user.email;
                 document.getElementById('navbar-username').textContent = username;
                 document.getElementById('mobile-username').textContent = username;
@@ -365,16 +457,17 @@
                 } else {
                     document.getElementById('user-info').style.display = 'none';
                 }
-                
-                // Show placeholder content for now
-                document.getElementById('leaderboard-message').style.display = 'none';
-                document.getElementById('placeholder-content').style.display = 'block';
             } else {
-                document.getElementById('leaderboard-message').textContent = 'Please sign up or log in to view the leaderboard!';
+                document.querySelector('.auth-buttons').style.display = 'flex';
+                if (window.innerWidth <= 768) {
+                    document.getElementById('mobile-auth-buttons').style.visibility = 'visible';
+                } else {
+                    document.getElementById('mobile-auth-buttons').style.visibility = 'hidden';
+                }
+                document.getElementById('user-info').style.display = 'none';
             }
         });
         
-        // Logout logic with confirmation popup
         document.getElementById('logout-btn').onclick = function() {
             document.getElementById('logout-modal').style.display = 'flex';
         };
@@ -406,6 +499,123 @@
                 }
             });
         }
+        
+        window.addEventListener('resize', () => {
+            supabase.auth.getUser().then(({ data }) => {
+                if (!(data && data.user)) {
+                    if (window.innerWidth <= 768) {
+                        document.getElementById('mobile-auth-buttons').style.visibility = 'visible';
+                    } else {
+                        document.getElementById('mobile-auth-buttons').style.visibility = 'hidden';
+                    }
+                } else {
+                    document.getElementById('mobile-auth-buttons').style.visibility = 'hidden';
+                }
+            });
+        });
+
+        // --- Weekly Leaderboard Logic ---
+        function getWeekRange(date) {
+            // Get Monday of the current week
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+            const monday = new Date(d.setDate(diff));
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+            return {
+                start: monday,
+                end: sunday
+            };
+        }
+        function formatDateShort(date) {
+            return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        }
+        async function loadWeeklyLeaderboard() {
+            document.getElementById('leaderboard-loading-spinner').style.display = 'flex';
+            const now = new Date();
+            const week = getWeekRange(now);
+            document.getElementById('weekly-leaderboard-header').textContent = `Weekly Leaderboard (${formatDateShort(week.start)} - ${formatDateShort(week.end)})`;
+            // Fetch all user_lineups (no filter)
+            let { data: userLineups, error } = await supabase.from('user_lineups').select('user_id, daily_lineups, username');
+            console.log('userLineups table data:', userLineups, 'error:', error);
+            if (error) {
+                document.getElementById('weekly-leaderboard-table').style.display = 'none';
+                document.getElementById('leaderboard-loading-spinner').style.display = 'none';
+                return;
+            }
+            // Helper to check if a date string is in the current week
+            const weekStartStr = week.start.toISOString().slice(0,10);
+            const weekEndStr = week.end.toISOString().slice(0,10);
+            function isInWeek(dateStr) {
+                return dateStr >= weekStartStr && dateStr <= weekEndStr;
+            }
+            // Build leaderboard
+            const leaderboard = [];
+            for (const ul of userLineups) {
+                let totalScore = 0;
+                if (ul.daily_lineups) {
+                    // For each date in daily_lineups, if in week, sum ratings for all player_ids
+                    const weekDates = Object.keys(ul.daily_lineups).filter(date => isInWeek(date));
+                    for (const date of weekDates) {
+                        const lineupArr = ul.daily_lineups[date];
+                        if (Array.isArray(lineupArr) && lineupArr.length > 0) {
+                            const playerIds = lineupArr.map(entry => entry.player_id);
+                            // Fetch player ratings for these playerIds
+                            if (playerIds.length > 0) {
+                                let { data: players, error: playerError } = await supabase
+                                    .from('mlb_players')
+                                    .select('id, rating')
+                                    .in('id', playerIds);
+                                if (!playerError && players) {
+                                    for (const pid of playerIds) {
+                                        const player = players.find(p => p.id === pid);
+                                        if (player && player.rating) totalScore += player.rating;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (totalScore > 0) {
+                    leaderboard.push({ user_id: ul.user_id, username: ul.username, totalScore });
+                }
+            }
+            leaderboard.sort((a, b) => b.totalScore - a.totalScore);
+            // Render table
+            const tbody = document.getElementById('weekly-leaderboard-body');
+            tbody.innerHTML = '';
+            leaderboard.forEach((entry, idx) => {
+            // The badge tier is set as follows:
+            // 18 or fewer days: Bronze I
+            // 19–20: Bronze II
+            // 21–22: Bronze III
+            // 23–24: Silver I
+            // 25–26: Silver II
+            // 27–28: Silver III
+            // 29 or more: Hall of Fame
+                let rankBadge = '';
+                if (idx === 0) rankBadge = '🥇';
+                else if (idx === 1) rankBadge = '🥈';
+                else if (idx === 2) rankBadge = '🥉';
+                const row = document.createElement('tr');
+                row.style.background = idx < 3 ? 'linear-gradient(90deg,#fff8f0,#ffeaa7)' : (idx%2===0?'#fff':'#fff8f0');
+                row.style.fontFamily = "'Press Start 2P',cursive";
+                row.style.fontSize = '1rem';
+                row.style.color = idx < 3 ? '#ff6b35' : '#2c3e50';
+                const profileUrl = `profile.html?user=${encodeURIComponent(entry.username)}`;
+                row.innerHTML = `
+                    <td style="text-align:center;vertical-align:middle;font-weight:bold;border-radius:12px 0 0 12px;">${rankBadge || idx+1}</td>
+                    <td class="player-cell"><a href="${profileUrl}" style="color:inherit;text-decoration:underline;cursor:pointer;">${entry.username}</a></td>
+                    <td style="text-align:center;vertical-align:middle;border-radius:0 12px 12px 0;">${entry.totalScore}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            document.getElementById('weekly-leaderboard-table').style.display = leaderboard.length ? 'table' : 'none';
+            document.getElementById('leaderboard-loading-spinner').style.display = 'none';
+        }
+        // Always load leaderboard on DOMContentLoaded
+        window.addEventListener('DOMContentLoaded', loadWeeklyLeaderboard);
     </script>
 </body>
 </html>

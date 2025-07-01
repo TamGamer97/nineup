@@ -179,6 +179,21 @@
                 font-size: 0.8rem;
             }
         }
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid #ffeaa7;
+            border-top: 3px solid #ff6b35;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
@@ -195,14 +210,14 @@
         <form class="auth-form" id="login-form">
             <input type="email" id="login-email" placeholder="Email" required autocomplete="username">
             <input type="password" id="login-password" placeholder="Password" required autocomplete="current-password">
-            <button type="submit">Login</button>
+            <button type="submit" id="login-btn"><span id="login-btn-text">Login</span><span class="spinner" id="login-spinner" style="display:none;"></span></button>
             <div class="auth-message" id="login-message"></div>
         </form>
         <form class="auth-form hide" id="signup-form">
             <input type="text" id="signup-username" placeholder="Username" required autocomplete="nickname">
             <input type="email" id="signup-email" placeholder="Email" required autocomplete="username">
             <input type="password" id="signup-password" placeholder="Password" required autocomplete="new-password">
-            <button type="submit">Sign Up</button>
+            <button type="submit" id="signup-btn"><span id="signup-btn-text">Sign Up</span><span class="spinner" id="signup-spinner" style="display:none;"></span></button>
             <div class="auth-message" id="signup-message"></div>
         </form>
     </div>
@@ -245,32 +260,35 @@
         if (supabase) {
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const loginBtn = document.getElementById('login-btn');
+                const loginSpinner = document.getElementById('login-spinner');
+                const loginBtnText = document.getElementById('login-btn-text');
+                loginBtn.disabled = true;
+                loginSpinner.style.display = 'inline-block';
+                loginBtnText.style.display = 'none';
                 const email = document.getElementById('login-email').value;
                 const password = document.getElementById('login-password').value;
                 const { error, data } = await supabase.auth.signInWithPassword({ email, password });
                 document.getElementById('login-message').textContent = error ? error.message : 'Login successful!';
+                loginBtn.disabled = false;
+                loginSpinner.style.display = 'none';
+                loginBtnText.style.display = 'inline';
                 if (!error) {
                     window.location.href = 'game.html';
                 }
             });
             signupForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const signupBtn = document.getElementById('signup-btn');
+                const signupSpinner = document.getElementById('signup-spinner');
+                const signupBtnText = document.getElementById('signup-btn-text');
+                signupBtn.disabled = true;
+                signupSpinner.style.display = 'inline-block';
+                signupBtnText.style.display = 'none';
                 const username = document.getElementById('signup-username').value;
                 const email = document.getElementById('signup-email').value;
                 const password = document.getElementById('signup-password').value;
-                
                 try {
-                    console.log('Signing up with metadata:', {
-                        display_name: username,
-                        data: {
-                            games_played: 0,
-                            high_score: 0,
-                            correct_answers: 0,
-                            badges: [],
-                            lineups: []
-                        }
-                    });
-                    
                     const { error, data } = await supabase.auth.signUp({ 
                         email, 
                         password,
@@ -287,27 +305,33 @@
                             }
                         }
                     });
-                    
                     if (error) {
                         console.error('Signup error:', error);
                         document.getElementById('signup-message').textContent = error.message;
+                        signupBtn.disabled = false;
+                        signupSpinner.style.display = 'none';
+                        signupBtnText.style.display = 'inline';
                         return;
                     }
-                    
                     if (data.user) {
-                        console.log('User created successfully:', data.user);
-                        console.log('User metadata:', data.user.user_metadata);
                         document.getElementById('signup-message').textContent = 'Signup successful! Check your email for verification.';
-                        // Switch to login form after signup
                         setTimeout(() => {
                             setActiveForm(true);
+                            signupBtn.disabled = false;
+                            signupSpinner.style.display = 'none';
+                            signupBtnText.style.display = 'inline';
                         }, 2000);
                     } else {
                         document.getElementById('signup-message').textContent = 'Signup failed. Please try again.';
+                        signupBtn.disabled = false;
+                        signupSpinner.style.display = 'none';
+                        signupBtnText.style.display = 'inline';
                     }
                 } catch (err) {
-                    console.error('Signup error:', err);
                     document.getElementById('signup-message').textContent = 'An unexpected error occurred. Please try again.';
+                    signupBtn.disabled = false;
+                    signupSpinner.style.display = 'none';
+                    signupBtnText.style.display = 'inline';
                 }
             });
             // Redirect if already signed in

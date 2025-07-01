@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MLB Trivia Game</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Boogaloo&family=Roboto:wght@300;400;500;700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pacifico&display=swap');
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: 'Press Start 2P', 'Pacifico', cursive, sans-serif;
             background: #fff8f0;
@@ -13,8 +19,6 @@
             min-height: 100vh;
             overflow-x: hidden;
         }
-        
-        /* Navigation - Same as main page */
         .navbar {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
@@ -26,7 +30,6 @@
             border-bottom: 1px solid rgba(255, 107, 53, 0.1);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
-        
         .nav-container {
             max-width: 1400px;
             margin: 0 auto;
@@ -35,7 +38,6 @@
             align-items: center;
             padding: 0 40px;
         }
-        
         .logo {
             font-family: 'Fredoka One', cursive;
             font-size: 2rem;
@@ -45,23 +47,18 @@
             align-items: center;
             gap: 10px;
             transition: transform 0.3s ease;
-            cursor: pointer;
         }
-        
         .logo:hover {
             transform: scale(1.05);
         }
-        
         .logo-icon {
             font-size: 2.5rem;
             animation: rotate 10s linear infinite;
         }
-        
         @keyframes rotate {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
-        
         .nav-links {
             display: flex;
             list-style: none;
@@ -72,7 +69,9 @@
             border-radius: 50px;
             backdrop-filter: blur(10px);
         }
-        
+        .nav-links li {
+            position: relative;
+        }
         .nav-links a {
             color: #2c3e50;
             text-decoration: none;
@@ -87,25 +86,36 @@
             overflow: hidden;
             z-index: 1;
         }
-        
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+            transition: left 0.5s;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .nav-links a:hover::before {
+            left: 100%;
+        }
         .nav-links a:hover {
             background: #ff6b35;
             color: white;
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
         }
-        
         .nav-links a.active {
             background: #ff6b35;
             color: white;
             box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
         }
-        
         .auth-buttons {
             display: flex;
             gap: 15px;
         }
-        
         .btn-login, .btn-signup {
             padding: 12px 28px;
             border-radius: 30px;
@@ -120,40 +130,34 @@
             position: relative;
             overflow: hidden;
         }
-        
         .btn-login {
             background: transparent;
             color: #ff6b35;
             border: 2px solid #ff6b35;
         }
-        
         .btn-login:hover {
             background: #ff6b35;
             color: white;
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
         }
-        
         .btn-signup {
             background: linear-gradient(135deg, #ff6b35, #f7931e);
             color: white;
             border: 2px solid transparent;
             box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
         }
-        
         .btn-signup:hover {
             background: linear-gradient(135deg, #f7931e, #ff8c42);
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
         }
-        
         .mobile-menu {
             display: none;
             flex-direction: column;
             cursor: pointer;
             padding: 10px;
         }
-        
         .hamburger {
             width: 25px;
             height: 3px;
@@ -162,7 +166,6 @@
             transition: 0.3s;
             border-radius: 2px;
         }
-        
         /* Game Container */
         .game-container {
             max-width: 800px;
@@ -806,10 +809,23 @@
             .game-actions {
                 flex-direction: column;
             }
+            
+            .auth-buttons {
+                display: none !important;
+            }
+            .mobile-auth-buttons {
+                display: flex !important;
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 10px;
+            }
         }
         
         @media (min-width: 769px) {
             .mobile-user-info {
+                display: none !important;
+            }
+            .mobile-auth-buttons {
                 display: none !important;
             }
         }
@@ -833,6 +849,10 @@
                 <li class="mobile-user-info" id="mobile-user-info">
                     <span class="mobile-username" id="mobile-username"></span>
                     <button class="mobile-logout-btn" id="mobile-logout-btn">Logout</button>
+                </li>
+                <li class="mobile-auth-buttons" id="mobile-auth-buttons" style="display:none;">
+                    <a href="registration.html" class="btn-login">Login</a>
+                    <a href="registration.html" class="btn-signup">Sign Up</a>
                 </li>
             </ul>
             
@@ -863,9 +883,8 @@
 
         <!-- Error State -->
         <div id="error-state" class="error-message" style="display:none;">
-            <h2>Oops! Something went wrong</h2>
-            <p>Please try refreshing the page or contact support.</p>
-            <button onclick="insertQuestionsForToday()" style="background:linear-gradient(135deg,#ff6b35,#f7931e);color:#fff;border:none;border-radius:20px;padding:15px 30px;font-family:'Press Start 2P',cursive;font-size:0.9rem;cursor:pointer;margin-top:20px;">Insert Questions for Today (Testing)</button>
+            <h2>Sign in to play the game!</h2>
+            <p>Please sign up or log in to access the daily MLB trivia challenge.</p>
         </div>
 
         <!-- Already Completed State -->
@@ -989,18 +1008,18 @@
                 // Check authentication
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) {
+                    // Hide lineup if not signed in
+                    document.getElementById('lineup-container').style.display = 'none';
                     showError('Please sign up or log in to play the game!');
                     return;
                 }
-                
                 currentUser = user;
-                
+                // Show lineup if signed in
+                document.getElementById('lineup-container').style.display = 'block';
                 // Update UI for logged in user
                 updateAuthUI();
-                
                 // Check if user has already completed today's questions
                 await checkDailyCompletion();
-                
                 if (hasCompletedToday) {
                     // Load today's players for completed state
                     await loadTodayPlayers();
@@ -1008,14 +1027,11 @@
                 } else {
                     // Load today's questions
                     await loadDailyQuestions();
-                    
                     // Restore question progress based on players collected today
                     await restoreQuestionProgressFromPlayers();
-                    
                     // Make sure lineup is displayed even if no players yet
                     updateLineupDisplay();
                 }
-                
             } catch (error) {
                 console.error('Game initialization error:', error);
                 showError('Failed to initialize game. Please try again.');
@@ -1034,7 +1050,6 @@
                 document.getElementById('user-info').style.display = 'none';
             }
         }
-        
         // Helper: get today's date in local timezone
         function getTodayDate() {
             const now = new Date();
@@ -1090,45 +1105,65 @@
         // Load today's questions
         async function loadDailyQuestions() {
             try {
-                const today = getTodayDate();
-                console.log('Looking for questions for date:', today);
-                
+                // Fetch all questions (no date filtering)
                 const { data, error } = await supabase
                     .from('daily_questions')
-                    .select('*')
-                    .eq('date', today)
-                    .order('question_order');
-                
-                console.log('Database query result:', { data, error });
-                
+                    .select('*');
+
                 if (error) {
                     console.error('Error loading questions:', error);
                     showError('Failed to load questions. Please try again.');
                     return;
                 }
-                
-                if (!data || data.length === 0) {
-                    console.log('No questions found for date:', today);
-                    console.log('Available dates in database:');
-                    // Let's also check what dates are available in the database
-                    const { data: allDates } = await supabase
-                        .from('daily_questions')
-                        .select('date')
-                        .order('date');
-                    console.log('All available dates:', allDates);
-                    
-                    showError('No questions available for today. Please try again later.');
+
+                if (!data || data.length < 9) {
+                    showError('Not enough questions available. Please try again later.');
                     return;
                 }
-                
-                console.log('Found questions:', data.length, 'questions for date:', today);
-                currentQuestions = data;
+
+                // Deterministic shuffle based on local date
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const seedString = `${year}-${month}-${day}`;
+                const seed = hashStringToSeed(seedString);
+                const shuffled = seededShuffle([...data], seed);
+                currentQuestions = shuffled.slice(0, 9);
                 showGameInterface();
                 displayQuestion();
-                
             } catch (error) {
                 console.error('Error loading questions:', error);
                 showError('Failed to load questions. Please try again.');
+            }
+        }
+        
+        // Helper: hash a string to a numeric seed
+        function hashStringToSeed(str) {
+            let hash = 5381;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) + hash) + str.charCodeAt(i); // hash * 33 + c
+            }
+            return hash >>> 0; // Ensure unsigned 32-bit integer
+        }
+        
+        // Helper: seeded shuffle (Fisher-Yates with Mulberry32 PRNG)
+        function seededShuffle(array, seed) {
+            let random = mulberry32(seed);
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        // Mulberry32 PRNG
+        function mulberry32(a) {
+            return function() {
+                var t = a += 0x6D2B79F5;
+                t = Math.imul(t ^ t >>> 15, t | 1);
+                t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+                return ((t ^ t >>> 14) >>> 0) / 4294967296;
             }
         }
         
@@ -1155,6 +1190,8 @@
             document.getElementById('loading-state').style.display = 'none';
             document.getElementById('error-state').style.display = 'block';
             document.getElementById('error-state').querySelector('p').textContent = message;
+            // Hide lineup if not signed in or on error
+            document.getElementById('lineup-container').style.display = 'none';
         }
         
         // Display current question
@@ -1450,7 +1487,7 @@
                     // Update existing record
                     const { error: updateError } = await supabase
                         .from('user_lineups')
-                        .update({ daily_lineups: currentLineups })
+                        .update({ daily_lineups: currentLineups, username: currentUser.user_metadata?.display_name || currentUser.email })
                         .eq('user_id', currentUser.id);
                     
                     if (updateError) {
@@ -1462,7 +1499,8 @@
                         .from('user_lineups')
                         .insert({
                             user_id: currentUser.id,
-                            daily_lineups: currentLineups
+                            daily_lineups: currentLineups,
+                            username: currentUser.user_metadata?.display_name || currentUser.email
                         });
                     
                     if (insertError) {
@@ -1782,98 +1820,37 @@
             });
         }
         
-        // Helper: insert questions for today (for testing)
-        async function insertQuestionsForToday() {
-            try {
-                const today = getTodayDate();
-                console.log('Inserting questions for date:', today);
-                
-                const questions = [
-                    {
-                        date: today,
-                        question_order: 1,
-                        question_text: 'Who holds the MLB record for most career home runs?',
-                        correct_answer: 'Barry Bonds',
-                        explanation: 'Barry Bonds hit 762 home runs during his career.'
-                    },
-                    {
-                        date: today,
-                        question_order: 2,
-                        question_text: 'In what year did Jackie Robinson break the color barrier in MLB?',
-                        correct_answer: '1947',
-                        explanation: 'Jackie Robinson made his MLB debut on April 15, 1947, for the Brooklyn Dodgers.'
-                    },
-                    {
-                        date: today,
-                        question_order: 3,
-                        question_text: 'Which team has won the most World Series championships?',
-                        correct_answer: 'New York Yankees',
-                        explanation: 'The Yankees have won 27 World Series championships.'
-                    },
-                    {
-                        date: today,
-                        question_order: 4,
-                        question_text: 'What is the name of the stadium where the Boston Red Sox play their home games?',
-                        correct_answer: 'Fenway Park',
-                        explanation: 'Fenway Park has been the home of the Red Sox since 1912.'
-                    },
-                    {
-                        date: today,
-                        question_order: 5,
-                        question_text: 'Who was the first player to hit 60 home runs in a single season?',
-                        correct_answer: 'Babe Ruth',
-                        explanation: 'Babe Ruth hit 60 home runs in 1927.'
-                    },
-                    {
-                        date: today,
-                        question_order: 6,
-                        question_text: 'What year did the designated hitter rule first come into effect in the American League?',
-                        correct_answer: '1973',
-                        explanation: 'The DH rule was introduced in the American League in 1973.'
-                    },
-                    {
-                        date: today,
-                        question_order: 7,
-                        question_text: 'Which pitcher holds the record for most career strikeouts?',
-                        correct_answer: 'Nolan Ryan',
-                        explanation: 'Nolan Ryan struck out 5,714 batters in his career.'
-                    },
-                    {
-                        date: today,
-                        question_order: 8,
-                        question_text: 'What is the name of the award given to the best pitcher in each league?',
-                        correct_answer: 'Cy Young Award',
-                        explanation: 'The Cy Young Award is named after Hall of Fame pitcher Cy Young.'
-                    },
-                    {
-                        date: today,
-                        question_order: 9,
-                        question_text: 'Which team was the first to win three consecutive World Series championships?',
-                        correct_answer: 'New York Yankees',
-                        explanation: 'The Yankees won three straight World Series from 1998-2000.'
-                    }
-                ];
-                
-                const { data, error } = await supabase
-                    .from('daily_questions')
-                    .insert(questions);
-                
-                if (error) {
-                    console.error('Error inserting questions:', error);
-                    alert('Error inserting questions: ' + error.message);
-                } else {
-                    console.log('Successfully inserted questions for today');
-                    alert('Questions inserted successfully! Refresh the page to play.');
-                    window.location.reload();
-                }
-            } catch (error) {
-                console.error('Error inserting questions:', error);
-                alert('Error inserting questions: ' + error.message);
-            }
-        }
-        
         // Initialize game when page loads
         document.addEventListener('DOMContentLoaded', initGame);
+        
+        supabase.auth.getUser().then(({ data }) => {
+            if (data && data.user) {
+                document.querySelector('.auth-buttons').style.display = 'none';
+                document.getElementById('mobile-auth-buttons').style.visibility = 'hidden'; // Use visibility hidden when signed in
+                // ... existing code ...
+            } else {
+                document.querySelector('.auth-buttons').style.display = 'flex';
+                // Only show mobile auth buttons in mobile view
+                if (window.innerWidth <= 768) {
+                    document.getElementById('mobile-auth-buttons').style.visibility = 'visible';
+                } else {
+                    document.getElementById('mobile-auth-buttons').style.visibility = 'hidden';
+                }
+            }
+        });
+        window.addEventListener('resize', () => {
+            supabase.auth.getUser().then(({ data }) => {
+                if (!(data && data.user)) {
+                    if (window.innerWidth <= 768) {
+                        document.getElementById('mobile-auth-buttons').style.visibility = 'visible';
+                    } else {
+                        document.getElementById('mobile-auth-buttons').style.visibility = 'hidden';
+                    }
+                } else {
+                    document.getElementById('mobile-auth-buttons').style.visibility = 'hidden'; // Use visibility hidden when signed in
+                }
+            });
+        });
     </script>
 </body>
 </html>

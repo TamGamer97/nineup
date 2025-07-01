@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Retro MLB Trivia</title>
+    <title>Nineup</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Boogaloo&family=Roboto:wght@300;400;500;700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pacifico&display=swap');
@@ -712,6 +712,16 @@
             .footer-links {
                 gap: 20px;
             }
+            
+            .auth-buttons {
+                display: none !important;
+            }
+            .mobile-auth-buttons {
+                display: flex !important;
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 10px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -741,6 +751,9 @@
         
         @media (min-width: 769px) {
             .mobile-user-info {
+                display: none !important;
+            }
+            .mobile-auth-buttons {
                 display: none !important;
             }
         }
@@ -776,6 +789,10 @@
                     <span class="mobile-username" id="mobile-username"></span>
                     <button class="mobile-logout-btn" id="mobile-logout-btn">Logout</button>
                 </li>
+                <li class="mobile-auth-buttons" id="mobile-auth-buttons" style="display:none;">
+                    <a href="registration.html" class="btn-login">Login</a>
+                    <a href="registration.html" class="btn-signup">Sign Up</a>
+                </li>
             </ul>
             
             <div class="auth-buttons">
@@ -806,10 +823,10 @@
             From legendary moments to forgotten heroes, test your knowledge and climb the leaderboards!
         </p>
         <div class="cta-container">
-            <a href="#" class="cta-button" onclick="startGame()">
+            <a href="game.html" class="cta-button">
                 🚀 Start Playing
             </a>
-            <a href="#" class="cta-button cta-secondary" onclick="showLeaderboard()">
+            <a href="leaderboard.html" class="cta-button cta-secondary">
                 View Leaderboard
             </a>
         </div>
@@ -883,18 +900,18 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-container">
-            <div class="footer-logo">⚾ MLB Trivia</div>
+            <div class="footer-logo">⚾ Nineup</div>
             <p class="footer-text">Celebrating America's pastime through knowledge and competition</p>
             <div class="footer-links">
-                <a href="#">About Us</a>
+                <!-- <a href="#">About Us</a>
                 <a href="#">How to Play</a>
                 <a href="#">Privacy Policy</a>
                 <a href="#">Terms of Service</a>
                 <a href="#">Contact</a>
-                <a href="#">FAQ</a>
+                <a href="#">FAQ</a> -->
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 Daily Retro MLB Trivia. All rights reserved. Made with ❤️ for baseball fans.</p>
+                <p>&copy; 2025 Nineup. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -1012,9 +1029,11 @@
         const supabaseUrl = 'https://nvgrzcarcxokdtbtqbtn.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52Z3J6Y2FyY3hva2R0YnRxYnRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMTczMTUsImV4cCI6MjA2Njg5MzMxNX0._Ta2Uon4TQ9Uqr4nSJenlR32hJfHp41QX8w9A4bOLcU';
         const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-        supabase.auth.getUser().then(async ({ data }) => {
+        supabase.auth.getUser().then(({ data }) => {
             if (data && data.user) {
                 document.querySelector('.auth-buttons').style.display = 'none';
+                document.getElementById('mobile-auth-buttons').style.visibility = 'hidden';
+                document.getElementById('mobile-user-info').style.display = 'flex';
                 // Get display name from user metadata
                 const username = data.user.user_metadata?.display_name || data.user.email;
                 document.getElementById('navbar-username').textContent = username;
@@ -1024,7 +1043,31 @@
                 } else {
                     document.getElementById('user-info').style.display = 'none';
                 }
+            } else {
+                document.querySelector('.auth-buttons').style.display = 'flex';
+                document.getElementById('mobile-user-info').style.display = 'none';
+                // Only show mobile auth buttons in mobile view
+                if (window.innerWidth <= 768) {
+                    document.getElementById('mobile-auth-buttons').style.visibility = 'visible';
+                } else {
+                    document.getElementById('mobile-auth-buttons').style.visibility = 'hidden';
+                }
             }
+        });
+        window.addEventListener('resize', () => {
+            supabase.auth.getUser().then(({ data }) => {
+                if (!(data && data.user)) {
+                    document.getElementById('mobile-user-info').style.display = 'none';
+                    if (window.innerWidth <= 768) {
+                        document.getElementById('mobile-auth-buttons').style.visibility = 'visible';
+                    } else {
+                        document.getElementById('mobile-auth-buttons').style.visibility = 'hidden';
+                    }
+                } else {
+                    document.getElementById('mobile-user-info').style.display = 'flex';
+                    document.getElementById('mobile-auth-buttons').style.visibility = 'hidden';
+                }
+            });
         });
         // Logout logic with confirmation popup
         document.getElementById('logout-btn').onclick = function() {

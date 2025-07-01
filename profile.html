@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - Daily Retro MLB Trivia</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Boogaloo&family=Roboto:wght@300;400;500;700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pacifico&display=swap');
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: 'Press Start 2P', 'Pacifico', cursive, sans-serif;
             background: #fff8f0;
@@ -13,8 +19,6 @@
             min-height: 100vh;
             overflow-x: hidden;
         }
-        
-        /* Navigation - Same as main page */
         .navbar {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
@@ -26,7 +30,6 @@
             border-bottom: 1px solid rgba(255, 107, 53, 0.1);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
-        
         .nav-container {
             max-width: 1400px;
             margin: 0 auto;
@@ -35,7 +38,6 @@
             align-items: center;
             padding: 0 40px;
         }
-        
         .logo {
             font-family: 'Fredoka One', cursive;
             font-size: 2rem;
@@ -45,23 +47,18 @@
             align-items: center;
             gap: 10px;
             transition: transform 0.3s ease;
-            cursor: pointer;
         }
-        
         .logo:hover {
             transform: scale(1.05);
         }
-        
         .logo-icon {
             font-size: 2.5rem;
             animation: rotate 10s linear infinite;
         }
-        
         @keyframes rotate {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
-        
         .nav-links {
             display: flex;
             list-style: none;
@@ -72,7 +69,9 @@
             border-radius: 50px;
             backdrop-filter: blur(10px);
         }
-        
+        .nav-links li {
+            position: relative;
+        }
         .nav-links a {
             color: #2c3e50;
             text-decoration: none;
@@ -87,25 +86,36 @@
             overflow: hidden;
             z-index: 1;
         }
-        
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+            transition: left 0.5s;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .nav-links a:hover::before {
+            left: 100%;
+        }
         .nav-links a:hover {
             background: #ff6b35;
             color: white;
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
         }
-        
         .nav-links a.active {
             background: #ff6b35;
             color: white;
             box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
         }
-        
         .auth-buttons {
             display: flex;
             gap: 15px;
         }
-        
         .btn-login, .btn-signup {
             padding: 12px 28px;
             border-radius: 30px;
@@ -120,40 +130,34 @@
             position: relative;
             overflow: hidden;
         }
-        
         .btn-login {
             background: transparent;
             color: #ff6b35;
             border: 2px solid #ff6b35;
         }
-        
         .btn-login:hover {
             background: #ff6b35;
             color: white;
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
         }
-        
         .btn-signup {
             background: linear-gradient(135deg, #ff6b35, #f7931e);
             color: white;
             border: 2px solid transparent;
             box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
         }
-        
         .btn-signup:hover {
             background: linear-gradient(135deg, #f7931e, #ff8c42);
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
         }
-        
         .mobile-menu {
             display: none;
             flex-direction: column;
             cursor: pointer;
             padding: 10px;
         }
-        
         .hamburger {
             width: 25px;
             height: 3px;
@@ -314,12 +318,185 @@
                 grid-template-columns: repeat(2, 1fr);
                 gap: 15px;
             }
+            
+            .auth-buttons {
+                display: none !important;
+            }
+            
+            .mobile-auth-buttons {
+                display: flex !important;
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 10px;
+            }
         }
         
         @media (min-width: 769px) {
             .mobile-user-info {
                 display: none !important;
             }
+            .mobile-auth-buttons {
+                display: none !important;
+            }
+        }
+        .retro-lineup-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+            gap: 24px;
+            justify-items: center;
+            justify-content: center;
+            margin: 32px auto 32px auto;
+            background: repeating-linear-gradient(135deg, #fff8f0, #ffeaa7 40px, #fff8f0 80px, #ffeaa7 120px);
+            border: 4px solid #2c3e50;
+            box-shadow: 0 0 0 8px #ff6b35, 0 8px 32px rgba(44,62,80,0.13);
+            border-radius: 0px;
+            padding: 32px 16px 32px 16px;
+            max-width: 1050px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .retro-lineup-grid .lineup-player {
+            background: repeating-linear-gradient(135deg, #fff, #fff 12px, #ffeaa7 12px, #ffeaa7 24px);
+            border: 4px solid #2c3e50;
+            border-radius: 0px;
+            box-shadow: 0 0 0 4px #ff6b35, 0 4px 18px rgba(44,62,80,0.10);
+            padding: 14px 10px 10px 10px;
+            min-width: 155px;
+            max-width: 155px;
+            height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            font-family: 'Press Start 2P', cursive, monospace;
+            transition: transform 0.18s, box-shadow 0.18s;
+            margin: 0;
+        }
+        .retro-lineup-grid .player-avatar {
+            width: 32px;
+            height: 32px;
+            background: #2c3e50;
+            border: 3px solid #ff6b35;
+            border-radius: 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #ffeaa7;
+            font-family: 'Press Start 2P', cursive, monospace;
+            font-weight: bold;
+            margin-bottom: 6px;
+            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.12);
+        }
+        .retro-lineup-grid .player-info {
+            text-align: center;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .retro-lineup-grid .player-name-small {
+            font-size: 0.78rem;
+            color: #2c3e50;
+            margin-bottom: 2px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 0 #ffeaa7;
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+        .retro-lineup-grid .player-rating-badge {
+            display: inline-block;
+            background: #2c3e50;
+            color: #ffeaa7;
+            font-size: 1.05rem;
+            border: 2.5px solid #ff6b35;
+            border-radius: 0px;
+            padding: 2px 12px;
+            margin: 4px 0 2px 0;
+            font-weight: 700;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.10);
+            text-shadow: 1px 1px 0 #f7931e;
+        }
+        .retro-lineup-grid .player-position {
+            font-size: 0.7rem;
+            color: #ff6b35;
+            margin-bottom: 2px;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 0 #ffeaa7;
+            line-height: 1.1;
+        }
+        .profile-lineup-section {
+            margin-top: 40px;
+            width: 100vw;
+            position: absolute;
+            left: 0px;
+        }
+        .lineup-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 18px;
+            font-family: 'Press Start 2P', cursive, monospace;
+            text-shadow: 2px 2px 0 #ffeaa7, 4px 4px 0 #ff6b35;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            justify-content: center;
+            text-align: center;
+        }
+        .lineup-title::before {
+            content: '★';
+            color: #ffb800;
+            font-size: 1.3em;
+            text-shadow: 2px 2px 0 #fff8f0;
+        }
+        @media (max-width: 1400px) {
+            .retro-lineup-grid {
+                grid-template-columns: repeat(4, 1fr);
+                max-width: 1050px;
+            }
+        }
+        @media (max-width: 1100px) {
+            .retro-lineup-grid {
+                grid-template-columns: repeat(3, 1fr);
+                max-width: 800px;
+            }
+        }
+        @media (max-width: 800px) {
+            .retro-lineup-grid {
+                grid-template-columns: repeat(2, 1fr);
+                max-width: 500px;
+            }
+        }
+        @media (max-width: 600px) {
+            .retro-lineup-grid {
+                grid-template-columns: 1fr;
+                padding: 8px 1vw;
+                max-width: 98vw;
+            }
+            .lineup-player { min-width: 70px; max-width: 90px; font-size: 0.7rem; }
+            .player-avatar { width: 24px; height: 24px; font-size: 0.7rem; }
+        }
+        .profile-stats {
+            margin-bottom: 40px;
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #ffeaa7;
+            border-top: 4px solid #ff6b35;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
@@ -332,7 +509,6 @@
                 <span class="logo-icon">⚾</span>
                 Nineup
             </a>
-            
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="game.html">Game</a></li>
@@ -342,18 +518,19 @@
                     <span class="mobile-username" id="mobile-username"></span>
                     <button class="mobile-logout-btn" id="mobile-logout-btn">Logout</button>
                 </li>
+                <li class="mobile-auth-buttons" id="mobile-auth-buttons" style="display:none;">
+                    <a href="registration.html" class="btn-login">Login</a>
+                    <a href="registration.html" class="btn-signup">Sign Up</a>
+                </li>
             </ul>
-            
             <div class="auth-buttons">
                 <a href="registration.html" class="btn-login">Login</a>
                 <a href="registration.html" class="btn-signup">Sign Up</a>
             </div>
-            
             <div id="user-info" style="display:none; align-items:center; gap:16px;">
                 <span id="navbar-username" style="font-family:'Press Start 2P',cursive;font-size:1rem;color:#ff6b35;"></span>
                 <button id="logout-btn" style="background:linear-gradient(135deg,#ff6b35,#f7931e);color:#fff;border:none;border-radius:20px;padding:8px 18px;font-family:'Press Start 2P',cursive;font-size:1rem;cursor:pointer;transition:background 0.3s;">Logout</button>
             </div>
-            
             <div class="mobile-menu" onclick="toggleMobileMenu()">
                 <div class="hamburger"></div>
                 <div class="hamburger"></div>
@@ -362,31 +539,26 @@
         </div>
     </nav>
 
-    <div class="profile-container">
-        <h1 class="profile-title">👤 Profile</h1>
-        <div class="profile-content">
-            <div class="profile-message" id="profile-message">Loading profile...</div>
-            <div class="profile-info" id="profile-info" style="display:none;">
-                <p>Welcome to your MLB Trivia profile!</p>
-                <p>Track your progress and achievements here.</p>
+    <div class="profile-container retro-bg">
+        <div class="profile-header">
+            <div class="profile-username-row">
+                <div class="profile-username" id="profile-username">@username</div>
             </div>
-            <div class="profile-stats" id="profile-stats" style="display:none;">
-                <div class="stat-item">
-                    <span class="stat-number">0</span>
-                    <span class="stat-label">Games Played</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">0</span>
-                    <span class="stat-label">High Score</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">0</span>
-                    <span class="stat-label">Correct Answers</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">0</span>
-                    <span class="stat-label">Achievements</span>
-                </div>
+        </div>
+        <div class="profile-stats retro-stats">
+            <div class="stat-item retro-card-yellow">
+                <span class="stat-number" id="stat-highscore">0</span>
+                <span class="stat-label">High Score</span>
+            </div>
+            <div class="stat-item retro-card-yellow">
+                <span class="stat-number" id="stat-badge">Bronze I</span>
+                <span class="stat-label">Badge Tier</span>
+            </div>
+        </div>
+        <div class="profile-lineup-section">
+            <div class="lineup-title">Most Recent Lineup</div>
+            <div class="retro-lineup-grid" id="lineup-players">
+                <!-- Player cards will be rendered here -->
             </div>
         </div>
     </div>
@@ -398,6 +570,11 @@
             <button id="confirm-logout" style="background:linear-gradient(135deg,#ff6b35,#f7931e);color:#fff;border:none;border-radius:20px;padding:10px 28px;font-family:'Press Start 2P',cursive;font-size:1rem;cursor:pointer;margin-right:10px;">Yes</button>
             <button id="cancel-logout" style="background:#eee;color:#2c3e50;border:none;border-radius:20px;padding:10px 28px;font-family:'Press Start 2P',cursive;font-size:1rem;cursor:pointer;">Cancel</button>
         </div>
+    </div>
+    
+    <!-- Add loading spinner above profile container -->
+    <div id="profile-loading-spinner" class="loading-message" style="display:flex;justify-content:center;align-items:center;margin:32px 0;">
+        <div class="loading-spinner"></div>
     </div>
     
     <script>
@@ -520,9 +697,8 @@
             if (data && data.user) {
                 // Ensure user has data field initialized
                 await ensureUserDataExists();
-                
-                // Hide auth buttons and show user info
                 document.querySelector('.auth-buttons').style.display = 'none';
+                document.getElementById('mobile-auth-buttons').style.visibility = 'hidden';
                 const loggedInUsername = data.user.user_metadata?.display_name || data.user.email;
                 document.getElementById('navbar-username').textContent = loggedInUsername;
                 document.getElementById('mobile-username').textContent = loggedInUsername;
@@ -567,6 +743,30 @@
                 document.querySelector('.stat-item:nth-child(2) .stat-number').textContent = userData.high_score || 0;
                 document.querySelector('.stat-item:nth-child(3) .stat-number').textContent = userData.correct_answers || 0;
                 document.querySelector('.stat-item:nth-child(4) .stat-number').textContent = userData.badges?.length || 0;
+
+                let badgeTier = 'Bronze I';
+                let numLineups = 0;
+                if (userData.lineups && userData.lineups.length > 0) {
+                    const dailyLineups = userData.lineups[0].daily_lineups || {};
+                    numLineups = Object.keys(dailyLineups).length;
+                    // Badge logic
+                    if (numLineups <= 18) {
+                        badgeTier = 'Bronze I';
+                    } else if (numLineups <= 20) {
+                        badgeTier = 'Bronze II';
+                    } else if (numLineups <= 22) {
+                        badgeTier = 'Bronze III';
+                    } else if (numLineups <= 24) {
+                        badgeTier = 'Silver I';
+                    } else if (numLineups <= 26) {
+                        badgeTier = 'Silver II';
+                    } else if (numLineups <= 28) {
+                        badgeTier = 'Silver III';
+                    } else {
+                        badgeTier = 'Hall of Fame';
+                    }
+                }
+                document.getElementById('stat-badge').textContent = badgeTier;
             } else {
                 // Not logged in
                 const urlUsername = getProfileUsernameFromQuery();
@@ -588,7 +788,15 @@
                     document.getElementById('profile-stats').style.display = 'grid';
                     document.getElementById('profile-info').innerHTML = `<p>Profile for <span style=\"color:#ff6b35\">${urlUsername}</span></p>`;
                 }
+                document.querySelector('.auth-buttons').style.display = 'flex';
+                if (window.innerWidth <= 768) {
+                    document.getElementById('mobile-auth-buttons').style.visibility = 'visible';
+                } else {
+                    document.getElementById('mobile-auth-buttons').style.visibility = 'hidden';
+                }
             }
+            document.getElementById('profile-loading-spinner').style.display = 'none';
+            document.querySelector('.profile-container').style.visibility = 'visible';
         });
         
         // Logout logic with confirmation popup
@@ -623,6 +831,101 @@
                 }
             });
         }
+        
+        window.addEventListener('resize', () => {
+            supabase.auth.getUser().then(({ data }) => {
+                if (!(data && data.user)) {
+                    if (window.innerWidth <= 768) {
+                        document.getElementById('mobile-auth-buttons').style.visibility = 'visible';
+                    } else {
+                        document.getElementById('mobile-auth-buttons').style.visibility = 'hidden';
+                    }
+                } else {
+                    document.getElementById('mobile-auth-buttons').style.visibility = 'hidden';
+                }
+            });
+        });
+
+        // --- Retro Profile Logic ---
+        document.addEventListener('DOMContentLoaded', async function() {
+            document.getElementById('profile-loading-spinner').style.display = 'flex';
+            document.querySelector('.profile-container').style.visibility = 'hidden';
+            const supabaseUrl = 'https://nvgrzcarcxokdtbtqbtn.supabase.co';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52Z3J6Y2FyY3hva2R0YnRxYnRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMTczMTUsImV4cCI6MjA2Njg5MzMxNX0._Ta2Uon4TQ9Uqr4nSJenlR32hJfHp41QX8w9A4bOLcU';
+            const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+            const username = new URLSearchParams(window.location.search).get('user') || 'Player1';
+            document.getElementById('profile-username').textContent = '@' + username;
+            // Fetch user_lineups for this username
+            let { data: userLineups, error } = await supabase
+                .from('user_lineups')
+                .select('daily_lineups')
+                .eq('username', username);
+            let mostRecentLineup = [];
+            let highScore = 0;
+            if (userLineups && userLineups.length > 0) {
+                const dailyLineups = userLineups[0].daily_lineups || {};
+                const dates = Object.keys(dailyLineups).sort().reverse();
+                let highestScore = 0;
+                let mostRecentLineupFound = false;
+                for (const date of dates) {
+                    const lineupArr = dailyLineups[date];
+                    if (Array.isArray(lineupArr) && lineupArr.length > 0) {
+                        if (!mostRecentLineupFound) {
+                            mostRecentLineup = lineupArr;
+                            mostRecentLineupFound = true;
+                        }
+                        const playerIds = lineupArr.map(p => p.player_id);
+                        // Fetch all player details for this lineup
+                        // eslint-disable-next-line no-await-in-loop
+                        let { data: players, error: playerError } = await supabase
+                            .from('mlb_players')
+                            .select('id, rating')
+                            .in('id', playerIds);
+                        if (!playerError && players) {
+                            // Sum the ratings for this lineup
+                            let lineupScore = 0;
+                            for (const p of playerIds) {
+                                const player = players.find(pl => pl.id === p);
+                                if (player && player.rating) lineupScore += player.rating;
+                            }
+                            if (lineupScore > highestScore) highestScore = lineupScore;
+                        }
+                    }
+                }
+                document.getElementById('stat-highscore').textContent = highestScore;
+            }
+            // Fetch player details for the lineup
+            let playerCardsHtml = '';
+            if (mostRecentLineup.length > 0) {
+                const playerIds = mostRecentLineup.map(p => p.player_id);
+                let { data: players, error: playerError } = await supabase
+                    .from('mlb_players')
+                    .select('*')
+                    .in('id', playerIds);
+                if (!playerError && players) {
+                    // Sort by acquired_at if available
+                    mostRecentLineup.sort((a, b) => new Date(a.acquired_at) - new Date(b.acquired_at));
+                    playerCardsHtml = mostRecentLineup.map(lineupPlayer => {
+                        const player = players.find(p => p.id === lineupPlayer.player_id);
+                        if (!player) return '';
+                        return `<div class='lineup-player'>
+                            <div class='player-avatar'>${player.name.charAt(0).toUpperCase()}</div>
+                            <div class='player-info'>
+                                <div class='player-name-small'>${player.name.toUpperCase()}</div>
+                                <div class='player-rating-badge'>${player.rating}</div>
+                                <div class='player-position'>${player.position} • ${player.team}</div>
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+            } else {
+                playerCardsHtml = `<div style='color:#7f8c8d;font-size:0.9rem;text-align:center;'>No lineup found yet.</div>`;
+            }
+            document.getElementById('lineup-players').innerHTML = playerCardsHtml;
+            // TODO: Fetch and set stats, badge, etc. as before
+            document.getElementById('profile-loading-spinner').style.display = 'none';
+            document.querySelector('.profile-container').style.visibility = 'visible';
+        });
     </script>
 </body>
 </html>
