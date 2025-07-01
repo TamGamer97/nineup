@@ -1,0 +1,1879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLB Trivia Game</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pacifico&display=swap');
+        body {
+            font-family: 'Press Start 2P', 'Pacifico', cursive, sans-serif;
+            background: #fff8f0;
+            color: #2c3e50;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Navigation - Same as main page */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 20px 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 107, 53, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+        }
+        
+        .logo {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2rem;
+            color: #ff6b35;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+        }
+        
+        .logo-icon {
+            font-size: 2.5rem;
+            animation: rotate 10s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 10px;
+            align-items: center;
+            background: rgba(255, 107, 53, 0.05);
+            padding: 10px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-links a {
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            padding: 12px 24px;
+            border-radius: 30px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .nav-links a:hover {
+            background: #ff6b35;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+        }
+        
+        .nav-links a.active {
+            background: #ff6b35;
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+        
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn-login, .btn-signup {
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.95rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-login {
+            background: transparent;
+            color: #ff6b35;
+            border: 2px solid #ff6b35;
+        }
+        
+        .btn-login:hover {
+            background: #ff6b35;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+        }
+        
+        .btn-signup {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
+        }
+        
+        .btn-signup:hover {
+            background: linear-gradient(135deg, #f7931e, #ff8c42);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+        }
+        
+        .mobile-menu {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 10px;
+        }
+        
+        .hamburger {
+            width: 25px;
+            height: 3px;
+            background: #ff6b35;
+            margin: 3px 0;
+            transition: 0.3s;
+            border-radius: 2px;
+        }
+        
+        /* Game Container */
+        .game-container {
+            max-width: 800px;
+            margin: 120px auto 0 auto;
+            padding: 0 20px;
+        }
+        
+        .game-header {
+            background: #fff;
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(255, 107, 53, 0.12);
+            text-align: center;
+        }
+        
+        .game-title {
+            font-family: 'Pacifico', cursive;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ff6b35, #f7931e, #ff8c42);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .progress-container {
+            margin-bottom: 30px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #ffeaa7;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b35, #f7931e);
+            border-radius: 6px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+        
+        .progress-text {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem;
+            color: #ff6b35;
+            margin-top: 10px;
+        }
+        
+        /* Question Card */
+        .question-card {
+            background: #fff;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(255, 107, 53, 0.12);
+            margin-bottom: 30px;
+        }
+        
+        .question-number {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            color: #ff6b35;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .question-text {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2rem;
+            color: #2c3e50;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        /* Text Input */
+        .text-input-container {
+            margin-top: 20px;
+        }
+        
+        .text-input {
+            width: 100%;
+            padding: 20px;
+            border: 2px solid #ffeaa7;
+            border-radius: 16px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            background: #fff8f0;
+            color: #2c3e50;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+        
+        .text-input:focus {
+            border-color: #ff6b35;
+        }
+        
+        .text-input::placeholder {
+            color: #bdc3c7;
+            font-style: italic;
+        }
+        
+        .input-note {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            color: #ff6b35;
+            text-align: center;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Question Result Modal */
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .result-content {
+            background: #fff;
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideInUp 0.5s ease-out;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .result-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .result-title {
+            font-family: 'Pacifico', cursive;
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        
+        .result-correct {
+            color: #27ae60;
+        }
+        
+        .result-incorrect {
+            color: #e74c3c;
+        }
+        
+        .result-time {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        
+        .result-explanation {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            color: #2c3e50;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        /* Pack Opening Animation */
+        .pack-opening {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .pack-container {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            perspective: 1000px;
+        }
+        
+        .pack-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 1.5s ease-in-out;
+            cursor: pointer;
+        }
+        
+        .pack-card.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .pack-front, .pack-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .pack-front {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            transform: rotateY(0deg);
+        }
+        
+        .pack-back {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            transform: rotateY(180deg);
+        }
+        
+        .pack-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .pack-text {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2rem;
+            text-align: center;
+            line-height: 1.4;
+        }
+        
+        .player-reveal {
+            text-align: center;
+        }
+        
+        .player-rarity {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .rarity-legendary { color: #f39c12; }
+        .rarity-epic { color: #9b59b6; }
+        .rarity-rare { color: #3498db; }
+        .rarity-common { color: #95a5a6; }
+        
+        .player-name {
+            font-family: 'Pacifico', cursive;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: white;
+        }
+        
+        .player-details {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            color: #bdc3c7;
+            line-height: 1.4;
+        }
+        
+        .player-rating {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2rem;
+            color: #f39c12;
+            margin: 10px 0;
+        }
+        
+        /* --- Retro Pixel Lineup Styles --- */
+        .lineup-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: repeating-linear-gradient(45deg, #fff8f0, #fff8f0 18px, #ffeaa7 18px, #ffeaa7 36px);
+            border: 4px solid #2c3e50;
+            box-shadow: 0 0 0 6px #ff6b35, 0 8px 32px rgba(44,62,80,0.13);
+            border-radius: 0px;
+            padding: 32px 18px 24px 18px;
+            margin: 40px auto 0 auto;
+            max-width: 960px;
+            min-width: 320px;
+            width: 95%;
+            position: relative;
+            z-index: 10;
+            font-family: 'Press Start 2P', cursive, monospace;
+            transition: box-shadow 0.3s;
+        }
+        .lineup-container:hover {
+            box-shadow: 0 0 0 8px #f7931e, 0 16px 48px rgba(44,62,80,0.18);
+        }
+        .lineup-title {
+            font-family: 'Press Start 2P', cursive, monospace;
+            font-size: 1.1rem;
+            color: #2c3e50;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 0 #ffeaa7, 4px 4px 0 #ff6b35;
+            text-transform: uppercase;
+        }
+        .lineup-title::before {
+            content: '★';
+            font-size: 1.2rem;
+            margin-right: 6px;
+            color: #ff6b35;
+            text-shadow: 2px 2px 0 #fff8f0;
+        }
+        .lineup-players {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            justify-content: center;
+            align-items: stretch;
+            width: 100%;
+            margin-top: 8px;
+        }
+        .lineup-player {
+            background: repeating-linear-gradient(135deg, #fff, #fff 12px, #ffeaa7 12px, #ffeaa7 24px);
+            border: 3px solid #2c3e50;
+            border-radius: 0px;
+            box-shadow: 0 0 0 4px #ff6b35, 0 4px 18px rgba(44,62,80,0.10);
+            padding: 18px 10px 12px 10px;
+            min-width: 110px;
+            max-width: 140px;
+            flex: 1 1 110px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+            animation: fadeInScale 0.7s cubic-bezier(0.4,0,0.2,1);
+            font-family: 'Press Start 2P', cursive, monospace;
+        }
+        .lineup-player:hover {
+            transform: scale(1.08) translateY(-4px);
+            box-shadow: 0 0 0 6px #f7931e, 0 8px 32px rgba(44,62,80,0.18);
+        }
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.85); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .player-avatar {
+            width: 38px;
+            height: 38px;
+            background: #2c3e50;
+            border: 3px solid #ff6b35;
+            border-radius: 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #ffeaa7;
+            font-family: 'Press Start 2P', cursive, monospace;
+            font-weight: bold;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.12);
+        }
+        .player-info {
+            text-align: center;
+            width: 100%;
+        }
+        .player-name-small {
+            font-family: 'Press Start 2P', cursive, monospace;
+            font-size: 0.85rem;
+            color: #2c3e50;
+            margin-bottom: 2px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 0 #ffeaa7;
+            text-transform: uppercase;
+        }
+        .player-rating-badge {
+            display: inline-block;
+            background: #2c3e50;
+            color: #ffeaa7;
+            font-family: 'Press Start 2P', cursive, monospace;
+            font-size: 0.95rem;
+            border: 2.5px solid #ff6b35;
+            border-radius: 0px;
+            padding: 4px 10px;
+            margin: 6px 0 4px 0;
+            font-weight: 700;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.10);
+            text-shadow: 1px 1px 0 #f7931e;
+        }
+        .player-position {
+            font-family: 'Press Start 2P', cursive, monospace;
+            font-size: 0.7rem;
+            color: #ff6b35;
+            margin-bottom: 2px;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 0 #ffeaa7;
+        }
+        @media (max-width: 900px) {
+            .lineup-container { max-width: 99vw; }
+            .lineup-players { gap: 10px; }
+            .lineup-player { min-width: 90px; max-width: 110px; padding: 10px 4px; }
+        }
+        @media (max-width: 600px) {
+            .lineup-container { padding: 10px 1vw; }
+            .lineup-title { font-size: 0.8rem; }
+            .lineup-player { min-width: 70px; max-width: 90px; font-size: 0.7rem; }
+            .player-avatar { width: 24px; height: 24px; font-size: 0.7rem; }
+        }
+        
+        /* Action Buttons */
+        .game-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .game-btn {
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-next {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
+        }
+        
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+        }
+        
+        .btn-next:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+        
+        /* Completed Message */
+        .completed-message {
+            background: #fff;
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(255, 107, 53, 0.12);
+        }
+        
+        .completed-title {
+            font-family: 'Pacifico', cursive;
+            font-size: 2rem;
+            color: #ff6b35;
+            margin-bottom: 20px;
+        }
+        
+        .completed-text {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            color: #7f8c8d;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .score-display {
+            background: linear-gradient(135deg, #fff8f0, #ffeaa7);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 107, 53, 0.1);
+        }
+        
+        .score-number {
+            font-family: 'Pacifico', cursive;
+            font-size: 3rem;
+            color: #ff6b35;
+            display: block;
+        }
+        
+        .score-label {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            color: #2c3e50;
+            text-transform: uppercase;
+        }
+        
+        /* Loading and Error States */
+        .loading-message, .error-message {
+            background: #fff;
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(255, 107, 53, 0.12);
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #ffeaa7;
+            border-top: 4px solid #ff6b35;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 20px;
+            }
+            
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 20px;
+                right: 20px;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                border-radius: 20px;
+                padding: 20px;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .nav-links.active {
+                display: flex;
+            }
+            
+            .mobile-menu {
+                display: flex;
+            }
+            
+            #user-info {
+                display: none !important;
+            }
+            
+            .mobile-user-info {
+                display: none;
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 15px;
+                padding-top: 15px;
+                border-top: 1px solid rgba(255, 107, 53, 0.1);
+            }
+            
+            .mobile-user-info.active {
+                display: flex;
+            }
+            
+            .mobile-username {
+                font-family: 'Press Start 2P', cursive;
+                font-size: 0.9rem;
+                color: #ff6b35;
+                text-align: center;
+            }
+            
+            .mobile-logout-btn {
+                background: linear-gradient(135deg, #ff6b35, #f7931e);
+                color: #fff;
+                border: none;
+                border-radius: 20px;
+                padding: 10px 20px;
+                font-family: 'Press Start 2P', cursive;
+                font-size: 0.8rem;
+                cursor: pointer;
+                transition: background 0.3s;
+                width: 100%;
+            }
+            
+            .game-container {
+                margin: 100px 20px 0 20px;
+            }
+            
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .question-card {
+                padding: 30px 20px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .answer-option {
+                font-size: 0.8rem;
+                padding: 15px;
+            }
+            
+            .game-actions {
+                flex-direction: column;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .mobile-user-info {
+                display: none !important;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">⚾</span>
+                Nineup
+            </a>
+            
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="game.html" class="active">Game</a></li>
+                <li><a href="leaderboard.html">Leaderboard</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li class="mobile-user-info" id="mobile-user-info">
+                    <span class="mobile-username" id="mobile-username"></span>
+                    <button class="mobile-logout-btn" id="mobile-logout-btn">Logout</button>
+                </li>
+            </ul>
+            
+            <div class="auth-buttons">
+                <a href="registration.html" class="btn-login">Login</a>
+                <a href="registration.html" class="btn-signup">Sign Up</a>
+            </div>
+            
+            <div id="user-info" style="display:none; align-items:center; gap:16px;">
+                <span id="navbar-username" style="font-family:'Press Start 2P',cursive;font-size:1rem;color:#ff6b35;"></span>
+                <button id="logout-btn" style="background:linear-gradient(135deg,#ff6b35,#f7931e);color:#fff;border:none;border-radius:20px;padding:8px 18px;font-family:'Press Start 2P',cursive;font-size:1rem;cursor:pointer;transition:background 0.3s;">Logout</button>
+            </div>
+            
+            <div class="mobile-menu" onclick="toggleMobileMenu()">
+                <div class="hamburger"></div>
+                <div class="hamburger"></div>
+                <div class="hamburger"></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="game-container">
+        <!-- Loading State -->
+        <div id="loading-state" class="loading-message">
+            <div class="loading-spinner"></div>
+            <h2>Loading today's questions...</h2>
+        </div>
+
+        <!-- Error State -->
+        <div id="error-state" class="error-message" style="display:none;">
+            <h2>Oops! Something went wrong</h2>
+            <p>Please try refreshing the page or contact support.</p>
+            <button onclick="insertQuestionsForToday()" style="background:linear-gradient(135deg,#ff6b35,#f7931e);color:#fff;border:none;border-radius:20px;padding:15px 30px;font-family:'Press Start 2P',cursive;font-size:0.9rem;cursor:pointer;margin-top:20px;">Insert Questions for Today (Testing)</button>
+        </div>
+
+        <!-- Already Completed State -->
+        <div id="completed-state" class="completed-message" style="display:none;">
+            <h2 class="completed-title">🎉 Challenge Complete!</h2>
+            <p class="completed-text">You've collected all 9 players for today's trivia challenge!</p>
+            <div class="score-display">
+                <span class="score-number" id="final-score">0</span>
+                <span class="score-label">Total Rating</span>
+            </div>
+            <p class="completed-text">Come back tomorrow for new questions!</p>
+            
+            <!-- Lineup Display for Completed State -->
+            <div class="lineup-container" id="completed-lineup-container" style="margin-top: 30px;">
+                <div class="lineup-title">Today's Lineup (9/9)</div>
+                <div class="lineup-players" id="completed-lineup-players">
+                    <!-- Players will be added here dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Interface -->
+        <div id="game-interface" style="display:none;">
+            <!-- Game Header -->
+            <div class="game-header">
+                <h1 class="game-title">Daily MLB Trivia</h1>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">Question 1 of 9</div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="question-card">
+                <div class="question-number" id="question-number">Question 1</div>
+                <div class="question-text" id="question-text">Loading question...</div>
+                
+                <!-- Text Input -->
+                <div class="text-input-container" id="text-input-container">
+                    <input type="text" class="text-input" id="text-answer" placeholder="Type your answer here...">
+                    <div class="input-note">⚠️ Case-sensitive • Exact spelling required</div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="game-actions">
+                    <button class="game-btn btn-next" id="next-btn" disabled>Next Question</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Lineup Display -->
+    <div class="lineup-container" id="lineup-container">
+        <div class="lineup-title" id="lineup-title">Today's Lineup (0/9)</div>
+        <div class="lineup-players" id="lineup-players">
+            <!-- Players will be added here dynamically -->
+        </div>
+    </div>
+
+    <!-- Question Result Modal -->
+    <div class="result-modal" id="result-modal">
+        <div class="result-content">
+            <div class="result-icon" id="result-icon">✅</div>
+            <div class="result-title" id="result-title">Correct!</div>
+            <div class="result-time" id="result-time">Answered in 5.2 seconds</div>
+            <div class="result-explanation" id="result-explanation">Explanation will appear here...</div>
+            <button class="game-btn btn-next" id="result-next-btn">Continue</button>
+        </div>
+    </div>
+
+    <!-- Pack Opening Animation -->
+    <div class="pack-opening" id="pack-opening">
+        <div class="pack-container">
+            <div class="pack-card" id="pack-card">
+                <div class="pack-front">
+                    <div class="pack-icon">⚾</div>
+                    <div class="pack-text">MLB Player Pack<br>Every Answer Wins!</div>
+                </div>
+                <div class="pack-back">
+                    <div class="player-reveal" id="player-reveal">
+                        <div class="player-rarity" id="player-rarity">Legendary</div>
+                        <div class="player-name" id="player-name">Babe Ruth</div>
+                        <div class="player-rating" id="player-rating">99</div>
+                        <div class="player-details" id="player-details">RF • New York Yankees</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="logout-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(44,62,80,0.35);z-index:2000;align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:24px;box-shadow:0 8px 32px rgba(255,107,53,0.18);padding:32px 24px;max-width:320px;text-align:center;">
+            <div style="font-family:'Pacifico',cursive;font-size:1.3rem;margin-bottom:18px;color:#ff6b35;">Confirm Logout</div>
+            <div style="font-size:1rem;color:#2c3e50;margin-bottom:24px;">Are you sure you want to log out?</div>
+            <button id="confirm-logout" style="background:linear-gradient(135deg,#ff6b35,#f7931e);color:#fff;border:none;border-radius:20px;padding:10px 28px;font-family:'Press Start 2P',cursive;font-size:1rem;cursor:pointer;margin-right:10px;">Yes</button>
+            <button id="cancel-logout" style="background:#eee;color:#2c3e50;border:none;border-radius:20px;padding:10px 28px;font-family:'Press Start 2P',cursive;font-size:1rem;cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+    
+    <script>
+        const supabaseUrl = 'https://nvgrzcarcxokdtbtqbtn.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52Z3J6Y2FyY3hva2R0YnRxYnRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMTczMTUsImV4cCI6MjA2Njg5MzMxNX0._Ta2Uon4TQ9Uqr4nSJenlR32hJfHp41QX8w9A4bOLcU';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        // Game state
+        let currentUser = null;
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let userAnswerTimes = [];
+        let userScore = 0;
+        let hasCompletedToday = false;
+        let questionStartTime = null;
+        let userLineup = [];
+        
+        // Initialize game
+        async function initGame() {
+            try {
+                // Check authentication
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    showError('Please sign up or log in to play the game!');
+                    return;
+                }
+                
+                currentUser = user;
+                
+                // Update UI for logged in user
+                updateAuthUI();
+                
+                // Check if user has already completed today's questions
+                await checkDailyCompletion();
+                
+                if (hasCompletedToday) {
+                    // Load today's players for completed state
+                    await loadTodayPlayers();
+                    showCompletedState();
+                } else {
+                    // Load today's questions
+                    await loadDailyQuestions();
+                    
+                    // Restore question progress based on players collected today
+                    await restoreQuestionProgressFromPlayers();
+                    
+                    // Make sure lineup is displayed even if no players yet
+                    updateLineupDisplay();
+                }
+                
+            } catch (error) {
+                console.error('Game initialization error:', error);
+                showError('Failed to initialize game. Please try again.');
+            }
+        }
+        
+        // Update authentication UI
+        function updateAuthUI() {
+            document.querySelector('.auth-buttons').style.display = 'none';
+            const username = currentUser.user_metadata?.display_name || currentUser.email;
+            document.getElementById('navbar-username').textContent = username;
+            document.getElementById('mobile-username').textContent = username;
+            if (window.innerWidth > 768) {
+                document.getElementById('user-info').style.display = 'flex';
+            } else {
+                document.getElementById('user-info').style.display = 'none';
+            }
+        }
+        
+        // Helper: get today's date in local timezone
+        function getTodayDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        // Check if user has completed today's questions
+        async function checkDailyCompletion() {
+            try {
+                const today = getTodayDate();
+                console.log('Checking completion for date:', today);
+                
+                // Get user's lineup data
+                const { data: lineupData, error } = await supabase
+                    .from('user_lineups')
+                    .select('daily_lineups')
+                    .eq('user_id', currentUser.id)
+                    .single();
+                
+                if (error && error.code !== 'PGRST116') {
+                    console.error('Error checking user lineup:', error);
+                    return;
+                }
+                
+                // If no lineup data exists, user hasn't started today's game
+                if (!lineupData) {
+                    console.log('No lineup data found - user hasn\'t started today\'s game');
+                    hasCompletedToday = false;
+                    return;
+                }
+                
+                // Check if user has a lineup entry for today
+                const dailyLineups = lineupData.daily_lineups || {};
+                const todayLineup = dailyLineups[today] || [];
+                
+                // If they have 9 players for today, they've completed the game
+                hasCompletedToday = todayLineup.length >= 9;
+                if (hasCompletedToday) {
+                    // Calculate score based on sum of player ratings
+                    // We'll calculate this properly when we load the player details
+                    userScore = 0; // Will be calculated in loadTodayPlayers
+                }
+                
+                console.log(`Found ${todayLineup.length} players for today, completed: ${hasCompletedToday}`);
+            } catch (error) {
+                console.error('Error checking daily completion:', error);
+            }
+        }
+        
+        // Load today's questions
+        async function loadDailyQuestions() {
+            try {
+                const today = getTodayDate();
+                console.log('Looking for questions for date:', today);
+                
+                const { data, error } = await supabase
+                    .from('daily_questions')
+                    .select('*')
+                    .eq('date', today)
+                    .order('question_order');
+                
+                console.log('Database query result:', { data, error });
+                
+                if (error) {
+                    console.error('Error loading questions:', error);
+                    showError('Failed to load questions. Please try again.');
+                    return;
+                }
+                
+                if (!data || data.length === 0) {
+                    console.log('No questions found for date:', today);
+                    console.log('Available dates in database:');
+                    // Let's also check what dates are available in the database
+                    const { data: allDates } = await supabase
+                        .from('daily_questions')
+                        .select('date')
+                        .order('date');
+                    console.log('All available dates:', allDates);
+                    
+                    showError('No questions available for today. Please try again later.');
+                    return;
+                }
+                
+                console.log('Found questions:', data.length, 'questions for date:', today);
+                currentQuestions = data;
+                showGameInterface();
+                displayQuestion();
+                
+            } catch (error) {
+                console.error('Error loading questions:', error);
+                showError('Failed to load questions. Please try again.');
+            }
+        }
+        
+        // Show game interface
+        function showGameInterface() {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('game-interface').style.display = 'block';
+        }
+        
+        // Show completed state
+        function showCompletedState() {
+            
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('completed-state').style.display = 'block';
+            document.getElementById('final-score').textContent = userScore;
+            document.getElementById('game-interface').style.display = 'none';
+            document.getElementById('lineup-container').style.visibility = 'hidden';
+            // Make sure lineup is visible even when completed
+            updateLineupDisplay();
+        }
+        
+        // Show error state
+        function showError(message) {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('error-state').style.display = 'block';
+            document.getElementById('error-state').querySelector('p').textContent = message;
+        }
+        
+        // Display current question
+        function displayQuestion() {
+            if (currentQuestionIndex >= currentQuestions.length) {
+                completeGame();
+                return;
+            }
+            
+            const question = currentQuestions[currentQuestionIndex];
+            
+            // Start timing
+            questionStartTime = Date.now();
+            
+            // Update progress
+            const progressPercent = ((currentQuestionIndex + 1) / currentQuestions.length) * 100;
+            document.getElementById('progress-fill').style.width = `${progressPercent}%`;
+            document.getElementById('progress-text').textContent = `Question ${currentQuestionIndex + 1} of ${currentQuestions.length}`;
+            
+            // Update question number and text
+            document.getElementById('question-number').textContent = `Question ${currentQuestionIndex + 1}`;
+            document.getElementById('question-text').textContent = question.question_text;
+            
+            // Clear previous answer
+            document.getElementById('text-answer').value = '';
+            
+            // Focus on text input
+            document.getElementById('text-answer').focus();
+            
+            // Reset button state
+            document.getElementById('next-btn').disabled = true;
+            document.getElementById('next-btn').textContent = 'Next Question';
+        }
+        
+        // Handle text input
+        document.getElementById('text-answer').addEventListener('input', function() {
+            const answer = this.value.trim();
+            userAnswers[currentQuestionIndex] = answer;
+            document.getElementById('next-btn').disabled = answer.length === 0;
+        });
+        
+        // Handle next button
+        document.getElementById('next-btn').addEventListener('click', function() {
+            // Calculate answer time
+            const answerTime = (Date.now() - questionStartTime) / 1000;
+            userAnswerTimes[currentQuestionIndex] = answerTime;
+            
+            // Check if answer is correct
+            const question = currentQuestions[currentQuestionIndex];
+            const userAnswer = userAnswers[currentQuestionIndex];
+            const isCorrect = userAnswer === question.correct_answer;
+            
+            // Show result modal
+            showResultModal(isCorrect, answerTime, question);
+        });
+        
+        // Handle result modal continue button
+        document.getElementById('result-next-btn').addEventListener('click', function() {
+            document.getElementById('result-modal').style.display = 'none';
+            
+            if (currentQuestionIndex < currentQuestions.length - 1) {
+                currentQuestionIndex++;
+                displayQuestion();
+            } else {
+                completeGame();
+            }
+        });
+        
+        // Handle pack card click to start opening
+        document.getElementById('pack-card').addEventListener('click', function() {
+            if (!this.classList.contains('flipped')) {
+                this.classList.add('flipped');
+            }
+        });
+        
+        // Complete the game
+        async function completeGame() {
+            try {
+                // Calculate score based on sum of player ratings
+                userScore = userLineup.reduce((total, player) => total + player.rating, 0);
+                
+                // Update user stats
+                await updateUserStats({
+                    games_played: 1,
+                    high_score: Math.max(userScore, 0),
+                    correct_answers: userLineup.length
+                });
+                
+                // Show completion state
+                showCompletedState();
+                
+            } catch (error) {
+                console.error('Error completing game:', error);
+                showError('Failed to complete game. Please try again.');
+            }
+        }
+        
+        // Show result modal
+        function showResultModal(isCorrect, answerTime, question) {
+            const resultModal = document.getElementById('result-modal');
+            const resultIcon = document.getElementById('result-icon');
+            const resultTitle = document.getElementById('result-title');
+            const resultTime = document.getElementById('result-time');
+            const resultExplanation = document.getElementById('result-explanation');
+            const resultNextBtn = document.getElementById('result-next-btn');
+            
+            // Update modal content
+            if (isCorrect) {
+                resultIcon.textContent = '✅';
+                resultTitle.textContent = 'Correct!';
+                resultTitle.className = 'result-title result-correct';
+            } else {
+                resultIcon.textContent = '❌';
+                resultTitle.textContent = 'Incorrect';
+                resultTitle.className = 'result-title result-incorrect';
+            }
+            
+            resultTime.textContent = `Answered in ${answerTime.toFixed(1)} seconds`;
+            resultExplanation.textContent = question.explanation || 'No explanation available.';
+            
+            // Disable continue button initially
+            resultNextBtn.disabled = true;
+            resultNextBtn.textContent = 'Opening Pack...';
+            
+            // Show modal
+            resultModal.style.display = 'flex';
+            
+            // Show pack opening after a delay (regardless of correct/incorrect)
+            setTimeout(() => {
+                openPlayerPack(answerTime, isCorrect);
+            }, 2000);
+        }
+        
+        // Open player pack
+        async function openPlayerPack(answerTime, isCorrect) {
+            try {
+                // Calculate player rating based on answer time and correctness
+                const playerRating = calculatePlayerRating(answerTime, isCorrect);
+                
+                // Get random player with that rating, excluding already owned players
+                const { data: players, error } = await supabase
+                    .from('mlb_players')
+                    .select('*')
+                    .gte('rating', playerRating - 5)
+                    .lte('rating', playerRating + 5)
+                    .not('id', 'in', `(${userLineup.map(p => p.id).join(',') || '0'})`);
+                
+                if (error || !players || players.length === 0) {
+                    console.error('Error fetching players:', error);
+                    // If no players available in rating range, get any player not in lineup
+                    const { data: fallbackPlayers, error: fallbackError } = await supabase
+                        .from('mlb_players')
+                        .select('*')
+                        .not('id', 'in', `(${userLineup.map(p => p.id).join(',') || '0'})`);
+                    
+                    if (fallbackError || !fallbackPlayers || fallbackPlayers.length === 0) {
+                        console.error('No more unique players available');
+                        return;
+                    }
+                    
+                    const randomPlayer = fallbackPlayers[Math.floor(Math.random() * fallbackPlayers.length)];
+                    showPackOpening(randomPlayer, isCorrect);
+                    return;
+                }
+                
+                // Select random player
+                const randomPlayer = players[Math.floor(Math.random() * players.length)];
+                
+                // Show pack opening animation
+                showPackOpening(randomPlayer, isCorrect);
+                
+            } catch (error) {
+                console.error('Error opening player pack:', error);
+            }
+        }
+        
+        // Calculate player rating based on answer time and correctness
+        function calculatePlayerRating(answerTime, isCorrect) {
+            // Base rating starts at 50
+            let baseRating = 50;
+            
+            // Correctness bonus: correct answers get +15 points
+            if (isCorrect) {
+                baseRating += 15;
+            }
+            
+            // Time bonus: faster answers get higher ratings
+            // 0-3 seconds: +25 points
+            // 3-6 seconds: +15 points
+            // 6-10 seconds: +5 points
+            // 10+ seconds: +0 points
+            
+            if (answerTime <= 3) {
+                baseRating += 25;
+            } else if (answerTime <= 6) {
+                baseRating += 15;
+            } else if (answerTime <= 10) {
+                baseRating += 5;
+            }
+            
+            // Add some randomness (±5 points)
+            const randomBonus = Math.floor(Math.random() * 11) - 5;
+            baseRating += randomBonus;
+            
+            // Ensure rating is within bounds (50-99)
+            return Math.max(50, Math.min(99, baseRating));
+        }
+        
+        // Show pack opening animation
+        function showPackOpening(player, isCorrect) {
+            const packOpening = document.getElementById('pack-opening');
+            const packCard = document.getElementById('pack-card');
+            const playerRarity = document.getElementById('player-rarity');
+            const playerName = document.getElementById('player-name');
+            const playerRating = document.getElementById('player-rating');
+            const playerDetails = document.getElementById('player-details');
+            const resultNextBtn = document.getElementById('result-next-btn');
+            
+            // Update player info
+            playerRarity.textContent = player.rarity;
+            playerRarity.className = `player-rarity rarity-${player.rarity.toLowerCase()}`;
+            playerName.textContent = player.name;
+            playerRating.textContent = player.rating;
+            playerDetails.textContent = `${player.position} • ${player.team}`;
+            
+            // Show pack opening
+            packOpening.style.display = 'flex';
+            
+            // Flip card after 2 seconds
+            setTimeout(() => {
+                packCard.classList.add('flipped');
+                
+                // Add player to lineup after reveal
+                setTimeout(() => {
+                    addPlayerToLineup(player);
+                    
+                    // Hide pack opening after 3 seconds and enable continue button
+                    setTimeout(() => {
+                        packOpening.style.display = 'none';
+                        packCard.classList.remove('flipped');
+                        
+                        // Enable continue button
+                        resultNextBtn.disabled = false;
+                        resultNextBtn.textContent = 'Continue';
+                    }, 3000);
+                }, 1500);
+            }, 2000);
+        }
+        
+        // Add player to lineup
+        async function addPlayerToLineup(player) {
+            try {
+                const today = getTodayDate();
+                
+                // Check if player already in lineup
+                const existingPlayer = userLineup.find(p => p.id === player.id);
+                if (existingPlayer) {
+                    console.log('Player already in lineup:', player.name);
+                    return;
+                }
+                
+                // Add to local lineup
+                userLineup.push(player);
+                
+                // Get current lineup data
+                const { data: lineupData, error: getError } = await supabase
+                    .from('user_lineups')
+                    .select('daily_lineups')
+                    .eq('user_id', currentUser.id)
+                    .single();
+                
+                if (getError && getError.code !== 'PGRST116') {
+                    console.error('Error getting current lineup:', getError);
+                    return;
+                }
+                
+                // Prepare new lineup data
+                const currentLineups = lineupData?.daily_lineups || {};
+                const todayLineup = currentLineups[today] || [];
+                
+                // Add new player to today's lineup
+                const newPlayerEntry = {
+                    player_id: player.id,
+                    order: todayLineup.length + 1,
+                    acquired_at: new Date().toISOString()
+                };
+                
+                todayLineup.push(newPlayerEntry);
+                currentLineups[today] = todayLineup;
+                
+                // Save to database
+                if (lineupData) {
+                    // Update existing record
+                    const { error: updateError } = await supabase
+                        .from('user_lineups')
+                        .update({ daily_lineups: currentLineups })
+                        .eq('user_id', currentUser.id);
+                    
+                    if (updateError) {
+                        console.error('Error updating lineup:', updateError);
+                    }
+                } else {
+                    // Create new record
+                    const { error: insertError } = await supabase
+                        .from('user_lineups')
+                        .insert({
+                            user_id: currentUser.id,
+                            daily_lineups: currentLineups
+                        });
+                    
+                    if (insertError) {
+                        console.error('Error creating lineup:', insertError);
+                    }
+                }
+                
+                // Update lineup display
+                updateLineupDisplay();
+                
+            } catch (error) {
+                console.error('Error adding player to lineup:', error);
+            }
+        }
+        
+        // Update lineup display
+        function updateLineupDisplay() {
+            // Hide in-game lineup if completed state is visible
+            if (document.getElementById('completed-state').style.display === 'block') {
+                document.getElementById('lineup-container').style.display = 'none';
+            }
+            const lineupContainer = document.getElementById('lineup-container');
+            const lineupPlayers = document.getElementById('lineup-players');
+            const lineupTitle = document.getElementById('lineup-title');
+            const completedLineupContainer = document.getElementById('completed-lineup-container');
+            const completedLineupPlayers = document.getElementById('completed-lineup-players');
+            
+            console.log('Updating lineup display with', userLineup.length, 'players');
+            
+            // Update lineup title with progress
+            if (lineupTitle) {
+                lineupTitle.textContent = `Today's Lineup (${userLineup.length}/9)`;
+            }
+            
+            // Create player HTML
+            let playerHTML = '';
+            if (userLineup.length === 0) {
+                playerHTML = '<div style="text-align: center; color: #7f8c8d; font-size: 0.8rem; padding: 20px; font-family: \'Press Start 2P\', monospace;">No players collected yet today</div>';
+            } else {
+                playerHTML = userLineup.map(player => `
+                    <div class="lineup-player">
+                        <div class="player-avatar">${player.name.charAt(0)}</div>
+                        <div class="player-info">
+                            <div class="player-name-small">${player.name}</div>
+                            <div class="player-rating-badge">${player.rating}</div>
+                            <div class="player-position">${player.position} • ${player.team}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // Update game interface lineup
+            if (lineupContainer && lineupPlayers) {
+                lineupContainer.style.display = 'block';
+                lineupPlayers.innerHTML = playerHTML;
+            }
+            
+            // Update completed state lineup
+            if (completedLineupContainer && completedLineupPlayers) {
+                completedLineupContainer.style.display = 'block';
+                completedLineupPlayers.innerHTML = playerHTML;
+            }
+        }
+        
+        // Restore question progress based on players collected today
+        async function restoreQuestionProgressFromPlayers() {
+            try {
+                const today = getTodayDate();
+                console.log('Checking for players collected on:', today);
+                
+                // Get user's lineup data
+                const { data: lineupData, error } = await supabase
+                    .from('user_lineups')
+                    .select('daily_lineups')
+                    .eq('user_id', currentUser.id)
+                    .single();
+                
+                if (error && error.code !== 'PGRST116') {
+                    console.error('Error getting user lineup:', error);
+                    return;
+                }
+                
+                // If no lineup data exists, start from question 1
+                if (!lineupData) {
+                    console.log('No lineup data found - starting from question 1');
+                    userLineup = [];
+                    currentQuestionIndex = 0;
+                    showGameInterface();
+                    displayQuestion();
+                    return;
+                }
+                
+                // Get today's lineup
+                const dailyLineups = lineupData.daily_lineups || {};
+                const todayLineup = dailyLineups[today] || [];
+                
+                console.log(`Found ${todayLineup.length} players collected today:`, todayLineup);
+                
+                // Get player details for today's lineup
+                if (todayLineup.length > 0) {
+                    const playerIds = todayLineup.map(player => player.player_id);
+                    const { data: players, error: playersError } = await supabase
+                        .from('mlb_players')
+                        .select('*')
+                        .in('id', playerIds);
+                    
+                    if (playersError) {
+                        console.error('Error getting player details:', playersError);
+                        return;
+                    }
+                    
+                    // Sort players by the order they were acquired
+                    userLineup = todayLineup.map(lineupPlayer => {
+                        const player = players.find(p => p.id === lineupPlayer.player_id);
+                        return { ...player, acquired_at: lineupPlayer.acquired_at };
+                    }).sort((a, b) => new Date(a.acquired_at) - new Date(b.acquired_at));
+                } else {
+                    userLineup = [];
+                }
+                
+                console.log('Updated userLineup with today\'s players:', userLineup);
+                
+                // Set current question index based on players collected
+                // If 5 players collected, they're on question 6 (index 5)
+                currentQuestionIndex = todayLineup.length;
+                
+                console.log(`Starting at question ${currentQuestionIndex + 1} (index ${currentQuestionIndex})`);
+                
+                // If they've collected all players for today, they've completed the game
+                if (currentQuestionIndex >= currentQuestions.length) {
+                    console.log('All questions completed for today');
+                    // Calculate final score based on sum of player ratings
+                    userScore = userLineup.reduce((total, player) => total + player.rating, 0);
+                    console.log('Calculated final score:', userScore);
+                    showCompletedState();
+                    return;
+                }
+                
+                // Show game interface and display current question
+                showGameInterface();
+                displayQuestion();
+                
+                // Update lineup display to show today's players
+                updateLineupDisplay();
+                
+            } catch (error) {
+                console.error('Error restoring progress from players:', error);
+            }
+        }
+        
+        // Load today's players only
+        async function loadTodayPlayers() {
+            try {
+                const today = getTodayDate();
+                console.log('Loading today\'s players for date:', today);
+                
+                // Get user's lineup data
+                const { data: lineupData, error } = await supabase
+                    .from('user_lineups')
+                    .select('daily_lineups')
+                    .eq('user_id', currentUser.id)
+                    .single();
+                
+                if (error && error.code !== 'PGRST116') {
+                    console.error('Error loading user lineup:', error);
+                    return;
+                }
+                
+                // If no lineup data exists, no players for today
+                if (!lineupData) {
+                    console.log('No lineup data found - no players for today');
+                    userLineup = [];
+                    updateLineupDisplay();
+                    return;
+                }
+                
+                // Get today's lineup
+                const dailyLineups = lineupData.daily_lineups || {};
+                const todayLineup = dailyLineups[today] || [];
+                
+                // Get player details for today's lineup
+                if (todayLineup.length > 0) {
+                    const playerIds = todayLineup.map(player => player.player_id);
+                    const { data: players, error: playersError } = await supabase
+                        .from('mlb_players')
+                        .select('*')
+                        .in('id', playerIds);
+                    
+                    if (playersError) {
+                        console.error('Error getting player details:', playersError);
+                        return;
+                    }
+                    
+                    // Sort players by the order they were acquired
+                    userLineup = todayLineup.map(lineupPlayer => {
+                        const player = players.find(p => p.id === lineupPlayer.player_id);
+                        return { ...player, acquired_at: lineupPlayer.acquired_at };
+                    }).sort((a, b) => new Date(a.acquired_at) - new Date(b.acquired_at));
+                } else {
+                    userLineup = [];
+                }
+                
+                console.log('Loaded today\'s players:', userLineup.length, 'players');
+                
+                // Calculate score based on sum of player ratings
+                if (hasCompletedToday) {
+                    userScore = userLineup.reduce((total, player) => total + player.rating, 0);
+                    console.log('Calculated final score:', userScore);
+                }
+                
+                // Update display
+                updateLineupDisplay();
+                
+            } catch (error) {
+                console.error('Error loading today\'s players:', error);
+            }
+        }
+        
+        // Load user lineup (all players, not just today's)
+        async function loadUserLineup() {
+            try {
+                const { data: lineupData, error } = await supabase
+                    .from('user_lineups')
+                    .select(`
+                        player_id,
+                        created_at,
+                        mlb_players (*)
+                    `)
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: true });
+                
+                if (error) {
+                    console.error('Error loading lineup:', error);
+                    return;
+                }
+                
+                // Extract player data
+                userLineup = lineupData.map(item => item.mlb_players);
+                
+                console.log('Loaded all lineup with', userLineup.length, 'players');
+                
+                // Update display
+                updateLineupDisplay();
+                
+            } catch (error) {
+                console.error('Error loading user lineup:', error);
+            }
+        }
+        
+        // Helper: update user stats
+        async function updateUserStats(newStats) {
+            try {
+                const currentData = currentUser.user_metadata?.data || {
+                    games_played: 0,
+                    high_score: 0,
+                    correct_answers: 0,
+                    badges: [],
+                    lineups: []
+                };
+                
+                // Merge new stats with existing stats
+                const updatedData = { ...currentData };
+                updatedData.games_played += newStats.games_played || 0;
+                updatedData.high_score = Math.max(updatedData.high_score, newStats.high_score || 0);
+                updatedData.correct_answers += newStats.correct_answers || 0;
+                
+                // Update user metadata
+                const { error } = await supabase.auth.updateUser({
+                    data: {
+                        ...currentUser.user_metadata,
+                        data: updatedData
+                    }
+                });
+                
+                if (error) {
+                    console.error('Error updating user stats:', error);
+                    return false;
+                }
+                
+                return true;
+            } catch (err) {
+                console.error('Error updating user stats:', err);
+                return false;
+            }
+        }
+        
+        // Logout logic
+        document.getElementById('logout-btn').onclick = function() {
+            document.getElementById('logout-modal').style.display = 'flex';
+        };
+        document.getElementById('mobile-logout-btn').onclick = function() {
+            document.getElementById('logout-modal').style.display = 'flex';
+        };
+        document.getElementById('cancel-logout').onclick = function() {
+            document.getElementById('logout-modal').style.display = 'none';
+        };
+        document.getElementById('confirm-logout').onclick = async function() {
+            await supabase.auth.signOut();
+            window.location.reload();
+        };
+        
+        function toggleMobileMenu() {
+            const navLinks = document.querySelector('.nav-links');
+            const hamburgers = document.querySelectorAll('.hamburger');
+            
+            navLinks.classList.toggle('active');
+            
+            hamburgers.forEach((hamburger, index) => {
+                if (navLinks.classList.contains('active')) {
+                    if (index === 0) hamburger.style.transform = 'rotate(45deg) translate(6px, 6px)';
+                    if (index === 1) hamburger.style.opacity = '0';
+                    if (index === 2) hamburger.style.transform = 'rotate(-45deg) translate(6px, -6px)';
+                } else {
+                    hamburger.style.transform = 'none';
+                    hamburger.style.opacity = '1';
+                }
+            });
+        }
+        
+        // Helper: insert questions for today (for testing)
+        async function insertQuestionsForToday() {
+            try {
+                const today = getTodayDate();
+                console.log('Inserting questions for date:', today);
+                
+                const questions = [
+                    {
+                        date: today,
+                        question_order: 1,
+                        question_text: 'Who holds the MLB record for most career home runs?',
+                        correct_answer: 'Barry Bonds',
+                        explanation: 'Barry Bonds hit 762 home runs during his career.'
+                    },
+                    {
+                        date: today,
+                        question_order: 2,
+                        question_text: 'In what year did Jackie Robinson break the color barrier in MLB?',
+                        correct_answer: '1947',
+                        explanation: 'Jackie Robinson made his MLB debut on April 15, 1947, for the Brooklyn Dodgers.'
+                    },
+                    {
+                        date: today,
+                        question_order: 3,
+                        question_text: 'Which team has won the most World Series championships?',
+                        correct_answer: 'New York Yankees',
+                        explanation: 'The Yankees have won 27 World Series championships.'
+                    },
+                    {
+                        date: today,
+                        question_order: 4,
+                        question_text: 'What is the name of the stadium where the Boston Red Sox play their home games?',
+                        correct_answer: 'Fenway Park',
+                        explanation: 'Fenway Park has been the home of the Red Sox since 1912.'
+                    },
+                    {
+                        date: today,
+                        question_order: 5,
+                        question_text: 'Who was the first player to hit 60 home runs in a single season?',
+                        correct_answer: 'Babe Ruth',
+                        explanation: 'Babe Ruth hit 60 home runs in 1927.'
+                    },
+                    {
+                        date: today,
+                        question_order: 6,
+                        question_text: 'What year did the designated hitter rule first come into effect in the American League?',
+                        correct_answer: '1973',
+                        explanation: 'The DH rule was introduced in the American League in 1973.'
+                    },
+                    {
+                        date: today,
+                        question_order: 7,
+                        question_text: 'Which pitcher holds the record for most career strikeouts?',
+                        correct_answer: 'Nolan Ryan',
+                        explanation: 'Nolan Ryan struck out 5,714 batters in his career.'
+                    },
+                    {
+                        date: today,
+                        question_order: 8,
+                        question_text: 'What is the name of the award given to the best pitcher in each league?',
+                        correct_answer: 'Cy Young Award',
+                        explanation: 'The Cy Young Award is named after Hall of Fame pitcher Cy Young.'
+                    },
+                    {
+                        date: today,
+                        question_order: 9,
+                        question_text: 'Which team was the first to win three consecutive World Series championships?',
+                        correct_answer: 'New York Yankees',
+                        explanation: 'The Yankees won three straight World Series from 1998-2000.'
+                    }
+                ];
+                
+                const { data, error } = await supabase
+                    .from('daily_questions')
+                    .insert(questions);
+                
+                if (error) {
+                    console.error('Error inserting questions:', error);
+                    alert('Error inserting questions: ' + error.message);
+                } else {
+                    console.log('Successfully inserted questions for today');
+                    alert('Questions inserted successfully! Refresh the page to play.');
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error('Error inserting questions:', error);
+                alert('Error inserting questions: ' + error.message);
+            }
+        }
+        
+        // Initialize game when page loads
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>

@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard - Daily Retro MLB Trivia</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pacifico&display=swap');
+        body {
+            font-family: 'Press Start 2P', 'Pacifico', cursive, sans-serif;
+            background: #fff8f0;
+            color: #2c3e50;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Navigation - Same as main page */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 20px 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 107, 53, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+        }
+        
+        .logo {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2rem;
+            color: #ff6b35;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+        }
+        
+        .logo-icon {
+            font-size: 2.5rem;
+            animation: rotate 10s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 10px;
+            align-items: center;
+            background: rgba(255, 107, 53, 0.05);
+            padding: 10px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-links a {
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            padding: 12px 24px;
+            border-radius: 30px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .nav-links a:hover {
+            background: #ff6b35;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+        }
+        
+        .nav-links a.active {
+            background: #ff6b35;
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+        
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn-login, .btn-signup {
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.95rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-login {
+            background: transparent;
+            color: #ff6b35;
+            border: 2px solid #ff6b35;
+        }
+        
+        .btn-login:hover {
+            background: #ff6b35;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+        }
+        
+        .btn-signup {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
+        }
+        
+        .btn-signup:hover {
+            background: linear-gradient(135deg, #f7931e, #ff8c42);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+        }
+        
+        .mobile-menu {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 10px;
+        }
+        
+        .hamburger {
+            width: 25px;
+            height: 3px;
+            background: #ff6b35;
+            margin: 3px 0;
+            transition: 0.3s;
+            border-radius: 2px;
+        }
+        
+        /* Leaderboard content */
+        .leaderboard-container {
+            max-width: 800px;
+            margin: 120px auto 0 auto;
+            padding: 0 20px;
+        }
+        
+        .leaderboard-title {
+            font-family: 'Pacifico', cursive;
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, #ff6b35, #f7931e, #ff8c42);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .leaderboard-content {
+            background: #fff;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(255, 107, 53, 0.12);
+            text-align: center;
+        }
+        
+        .leaderboard-message {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2rem;
+            color: #ff6b35;
+            margin-bottom: 30px;
+        }
+        
+        .placeholder-content {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 20px;
+            }
+            
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 20px;
+                right: 20px;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                border-radius: 20px;
+                padding: 20px;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .nav-links.active {
+                display: flex;
+            }
+            
+            .mobile-menu {
+                display: flex;
+            }
+            
+            #user-info {
+                display: none !important;
+            }
+            
+            .mobile-user-info {
+                display: none;
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 15px;
+                padding-top: 15px;
+                border-top: 1px solid rgba(255, 107, 53, 0.1);
+            }
+            
+            .mobile-user-info.active {
+                display: flex;
+            }
+            
+            .mobile-username {
+                font-family: 'Press Start 2P', cursive;
+                font-size: 0.9rem;
+                color: #ff6b35;
+                text-align: center;
+            }
+            
+            .mobile-logout-btn {
+                background: linear-gradient(135deg, #ff6b35, #f7931e);
+                color: #fff;
+                border: none;
+                border-radius: 20px;
+                padding: 10px 20px;
+                font-family: 'Press Start 2P', cursive;
+                font-size: 0.8rem;
+                cursor: pointer;
+                transition: background 0.3s;
+                width: 100%;
+            }
+            
+            .leaderboard-container {
+                margin: 100px 20px 0 20px;
+            }
+            
+            .leaderboard-title {
+                font-size: 2rem;
+            }
+            
+            .leaderboard-content {
+                padding: 30px 20px;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .mobile-user-info {
+                display: none !important;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">⚾</span>
+                Nineup
+            </a>
+            
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="game.html">Game</a></li>
+                <li><a href="leaderboard.html" class="active">Leaderboard</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li class="mobile-user-info" id="mobile-user-info">
+                    <span class="mobile-username" id="mobile-username"></span>
+                    <button class="mobile-logout-btn" id="mobile-logout-btn">Logout</button>
+                </li>
+            </ul>
+            
+            <div class="auth-buttons">
+                <a href="registration.html" class="btn-login">Login</a>
+                <a href="registration.html" class="btn-signup">Sign Up</a>
+            </div>
+            
+            <div id="user-info" style="display:none; align-items:center; gap:16px;">
+                <span id="navbar-username" style="font-family:'Press Start 2P',cursive;font-size:1rem;color:#ff6b35;"></span>
+                <button id="logout-btn" style="background:linear-gradient(135deg,#ff6b35,#f7931e);color:#fff;border:none;border-radius:20px;padding:8px 18px;font-family:'Press Start 2P',cursive;font-size:1rem;cursor:pointer;transition:background 0.3s;">Logout</button>
+            </div>
+            
+            <div class="mobile-menu" onclick="toggleMobileMenu()">
+                <div class="hamburger"></div>
+                <div class="hamburger"></div>
+                <div class="hamburger"></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="leaderboard-container">
+        <h1 class="leaderboard-title">🏆 Leaderboard</h1>
+        <div class="leaderboard-content">
+            <div class="leaderboard-message" id="leaderboard-message">Loading leaderboard...</div>
+            <div class="placeholder-content" id="placeholder-content" style="display:none;">
+                <p>🏅 Top players will appear here!</p>
+                <p>📊 Play games to climb the rankings</p>
+                <p>🎯 Compete with baseball fans worldwide</p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="logout-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(44,62,80,0.35);z-index:2000;align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:24px;box-shadow:0 8px 32px rgba(255,107,53,0.18);padding:32px 24px;max-width:320px;text-align:center;">
+            <div style="font-family:'Pacifico',cursive;font-size:1.3rem;margin-bottom:18px;color:#ff6b35;">Confirm Logout</div>
+            <div style="font-size:1rem;color:#2c3e50;margin-bottom:24px;">Are you sure you want to log out?</div>
+            <button id="confirm-logout" style="background:linear-gradient(135deg,#ff6b35,#f7931e);color:#fff;border:none;border-radius:20px;padding:10px 28px;font-family:'Press Start 2P',cursive;font-size:1rem;cursor:pointer;margin-right:10px;">Yes</button>
+            <button id="cancel-logout" style="background:#eee;color:#2c3e50;border:none;border-radius:20px;padding:10px 28px;font-family:'Press Start 2P',cursive;font-size:1rem;cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+    
+    <script>
+        const supabaseUrl = 'https://nvgrzcarcxokdtbtqbtn.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52Z3J6Y2FyY3hva2R0YnRxYnRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMTczMTUsImV4cCI6MjA2Njg5MzMxNX0._Ta2Uon4TQ9Uqr4nSJenlR32hJfHp41QX8w9A4bOLcU';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        supabase.auth.getUser().then(({ data }) => {
+            if (data && data.user) {
+                // Hide auth buttons and show user info
+                document.querySelector('.auth-buttons').style.display = 'none';
+                const username = data.user.user_metadata?.display_name || data.user.email;
+                document.getElementById('navbar-username').textContent = username;
+                document.getElementById('mobile-username').textContent = username;
+                if (window.innerWidth > 768) {
+                    document.getElementById('user-info').style.display = 'flex';
+                } else {
+                    document.getElementById('user-info').style.display = 'none';
+                }
+                
+                // Show placeholder content for now
+                document.getElementById('leaderboard-message').style.display = 'none';
+                document.getElementById('placeholder-content').style.display = 'block';
+            } else {
+                document.getElementById('leaderboard-message').textContent = 'Please sign up or log in to view the leaderboard!';
+            }
+        });
+        
+        // Logout logic with confirmation popup
+        document.getElementById('logout-btn').onclick = function() {
+            document.getElementById('logout-modal').style.display = 'flex';
+        };
+        document.getElementById('mobile-logout-btn').onclick = function() {
+            document.getElementById('logout-modal').style.display = 'flex';
+        };
+        document.getElementById('cancel-logout').onclick = function() {
+            document.getElementById('logout-modal').style.display = 'none';
+        };
+        document.getElementById('confirm-logout').onclick = async function() {
+            await supabase.auth.signOut();
+            window.location.reload();
+        };
+        
+        function toggleMobileMenu() {
+            const navLinks = document.querySelector('.nav-links');
+            const hamburgers = document.querySelectorAll('.hamburger');
+            
+            navLinks.classList.toggle('active');
+            
+            hamburgers.forEach((hamburger, index) => {
+                if (navLinks.classList.contains('active')) {
+                    if (index === 0) hamburger.style.transform = 'rotate(45deg) translate(6px, 6px)';
+                    if (index === 1) hamburger.style.opacity = '0';
+                    if (index === 2) hamburger.style.transform = 'rotate(-45deg) translate(6px, -6px)';
+                } else {
+                    hamburger.style.transform = 'none';
+                    hamburger.style.opacity = '1';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
