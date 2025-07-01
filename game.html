@@ -830,7 +830,11 @@
             }
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <!-- Add dom-to-image-more CDN before main script -->
+    <script src="
+https://cdn.jsdelivr.net/npm/dom-to-image@2.6.0/dist/dom-to-image.min.js
+"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -904,6 +908,16 @@
                     <!-- Players will be added here dynamically -->
                 </div>
             </div>
+            
+            <!-- Share Section -->
+            <div id="share-section" style="display:none;text-align:center;margin-top:8px;">
+                <button id="share-btn" class="game-btn btn-next" style="margin-top:30px;">Share Your Lineup</button>
+                <div id="share-options" style="display:none;margin-top:12px;">
+                    <a id="whatsapp-share" href="#" target="_blank" style="margin:0 8px;">WhatsApp</a>
+                    <a id="email-share" href="#" style="margin:0 8px;">Email</a>
+                    <a id="download-share" href="#" download="lineup.png" style="margin:0 8px;">Download</a>
+                </div>
+            </div>
         </div>
 
         <!-- Game Interface -->
@@ -927,7 +941,7 @@
                 <!-- Text Input -->
                 <div class="text-input-container" id="text-input-container">
                     <input type="text" class="text-input" id="text-answer" placeholder="Type your answer here...">
-                    <div class="input-note">⚠️ Case-sensitive • Exact spelling required</div>
+                    <div class="input-note">⚠️ Exact spelling required</div>
                 </div>
                 
                 <!-- Action Buttons -->
@@ -985,6 +999,9 @@
             <button id="cancel-logout" style="background:#eee;color:#2c3e50;border:none;border-radius:20px;padding:10px 28px;font-family:'Press Start 2P',cursive;font-size:1rem;cursor:pointer;">Cancel</button>
         </div>
     </div>
+    
+    <!-- Add a hidden canvas for sharing -->
+    <canvas id="share-canvas" width="1400" height="1800" style="display:none;"></canvas>
     
     <script>
         const supabaseUrl = 'https://nvgrzcarcxokdtbtqbtn.supabase.co';
@@ -1175,7 +1192,6 @@
         
         // Show completed state
         function showCompletedState() {
-            
             document.getElementById('loading-state').style.display = 'none';
             document.getElementById('completed-state').style.display = 'block';
             document.getElementById('final-score').textContent = userScore;
@@ -1183,6 +1199,8 @@
             document.getElementById('lineup-container').style.visibility = 'hidden';
             // Make sure lineup is visible even when completed
             updateLineupDisplay();
+            document.getElementById('share-section').style.display = 'block';
+            document.getElementById('share-options').style.display = 'none';
         }
         
         // Show error state
@@ -1242,7 +1260,7 @@
             // Check if answer is correct
             const question = currentQuestions[currentQuestionIndex];
             const userAnswer = userAnswers[currentQuestionIndex];
-            const isCorrect = userAnswer === question.correct_answer;
+            const isCorrect = userAnswer && question.correct_answer && userAnswer.trim().toLowerCase() === question.correct_answer.trim().toLowerCase();
             
             // Show result modal
             showResultModal(isCorrect, answerTime, question);
@@ -1370,34 +1388,22 @@
         
         // Calculate player rating based on answer time and correctness
         function calculatePlayerRating(answerTime, isCorrect) {
-            // Base rating starts at 50
-            let baseRating = 50;
-            
-            // Correctness bonus: correct answers get +15 points
-            if (isCorrect) {
-                baseRating += 15;
+            if (answerTime <= 10) {
+                // 90-99
+                return Math.floor(Math.random() * 10) + 90;
+            } else if (answerTime <= 20) {
+                // 80-88
+                return Math.floor(Math.random() * 9) + 80;
+            } else if (answerTime <= 30) {
+                // 70-78
+                return Math.floor(Math.random() * 9) + 70;
+            } else if (answerTime <= 40) {
+                // 60-68
+                return Math.floor(Math.random() * 9) + 60;
+            } else {
+                // 50-58
+                return Math.floor(Math.random() * 9) + 50;
             }
-            
-            // Time bonus: faster answers get higher ratings
-            // 0-3 seconds: +25 points
-            // 3-6 seconds: +15 points
-            // 6-10 seconds: +5 points
-            // 10+ seconds: +0 points
-            
-            if (answerTime <= 3) {
-                baseRating += 25;
-            } else if (answerTime <= 6) {
-                baseRating += 15;
-            } else if (answerTime <= 10) {
-                baseRating += 5;
-            }
-            
-            // Add some randomness (±5 points)
-            const randomBonus = Math.floor(Math.random() * 11) - 5;
-            baseRating += randomBonus;
-            
-            // Ensure rating is within bounds (50-99)
-            return Math.max(50, Math.min(99, baseRating));
         }
         
         // Show pack opening animation
@@ -1563,6 +1569,8 @@
                 completedLineupContainer.style.display = 'block';
                 completedLineupPlayers.innerHTML = playerHTML;
             }
+            // In updateLineupDisplay, after userLineup is set or updated:
+            window.userLineup = userLineup;
         }
         
         // Restore question progress based on players collected today
@@ -1850,6 +1858,58 @@
                     document.getElementById('mobile-auth-buttons').style.visibility = 'hidden'; // Use visibility hidden when signed in
                 }
             });
+        });
+
+        // Add JS for share functionality at the end of the script:
+        document.addEventListener('DOMContentLoaded', function() {
+            const shareBtn = document.getElementById('share-btn');
+            if (shareBtn) {
+                shareBtn.onclick = async function() {
+                    const completedDiv = document.querySelector('.completed-message');
+                    if (!completedDiv) {
+                        alert('Could not find the lineup section to screenshot.');
+                        return;
+                    }
+                    if (!window.domtoimage) {
+                        alert('Screenshot feature failed to load. Please refresh and try again.');
+                        return;
+                    }
+                    // Hide the share button before taking the screenshot
+                    const originalDisplay = shareBtn.style.display;
+                    shareBtn.style.display = 'none';
+                    setTimeout(() => {
+                        window.domtoimage.toPng(completedDiv).then(function(dataUrl) {
+                            // Show the share button again after screenshot
+                            shareBtn.style.display = originalDisplay;
+                            if (navigator.share) {
+                                fetch(dataUrl)
+                                    .then(res => res.blob())
+                                    .then(blob => {
+                                        const file = new File([blob], 'lineup.png', { type: blob.type });
+                                        navigator.share({
+                                            files: [file],
+                                            title: 'Check out my MLB Trivia Lineup!',
+                                            text: 'Here is my lineup and score from today\'s MLB Trivia!'
+                                        });
+                                    });
+                                document.getElementById('share-options').style.display = 'none';
+                            } else {
+                                document.getElementById('share-options').style.display = 'block';
+                                const text = encodeURIComponent('Check out my MLB Trivia Lineup!');
+                                document.getElementById('whatsapp-share').href = `https://wa.me/?text=${text}`;
+                                document.getElementById('email-share').href = `mailto:?subject=My MLB Trivia Lineup&body=${text}`;
+                                const downloadLink = document.getElementById('download-share');
+                                downloadLink.href = dataUrl;
+                            }
+                        }).catch(function(error) {
+                            // Always show the share button again if there's an error
+                            shareBtn.style.display = originalDisplay;
+                            alert('Failed to generate screenshot. Try a different browser or refresh the page.');
+                            console.error(error);
+                        });
+                    }, 100); // Small delay to ensure DOM update
+                };
+            }
         });
     </script>
 </body>
