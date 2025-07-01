@@ -752,50 +752,71 @@
                     // Badge logic
                     let badgeIcon = '';
                     if (numLineups === 0) {
-                        badgeTier = 'Bronze I'; badgeIcon = '🥉';
+                        badgeTier = 'Bronze I'; badgeIcon = '1';
                     } else if (numLineups < 18) {
-                        badgeTier = 'Bronze I'; badgeIcon = '🥉';
+                        badgeTier = 'Bronze I'; badgeIcon = '1';
                     } else if (numLineups < 20) {
-                        badgeTier = 'Bronze II'; badgeIcon = '🥉';
+                        badgeTier = 'Bronze II'; badgeIcon = '2';
                     } else if (numLineups < 22) {
-                        badgeTier = 'Bronze III'; badgeIcon = '🥉';
+                        badgeTier = 'Bronze III'; badgeIcon = '3';
                     } else if (numLineups < 24) {
-                        badgeTier = 'Silver I'; badgeIcon = '🥈';
+                        badgeTier = 'Silver I'; badgeIcon = '1';
                     } else if (numLineups < 26) {
-                        badgeTier = 'Silver II'; badgeIcon = '🥈';
+                        badgeTier = 'Silver II'; badgeIcon = '2';
                     } else if (numLineups < 28) {
-                        badgeTier = 'Silver III'; badgeIcon = '🥈';
+                        badgeTier = 'Silver III'; badgeIcon = '3';
                     } else if (numLineups < 30) {
-                        badgeTier = 'Gold I'; badgeIcon = '🥇';
+                        badgeTier = 'Gold I'; badgeIcon = '1';
                     } else if (numLineups < 32) {
-                        badgeTier = 'Gold II'; badgeIcon = '🥇';
+                        badgeTier = 'Gold II'; badgeIcon = '2';
                     } else if (numLineups < 34) {
-                        badgeTier = 'Gold III'; badgeIcon = '🥇';
+                        badgeTier = 'Gold III'; badgeIcon = '3';
                     } else if (numLineups < 36) {
-                        badgeTier = 'Platinum I'; badgeIcon = '💎';
+                        badgeTier = 'Platinum I'; badgeIcon = '1';
                     } else if (numLineups < 38) {
-                        badgeTier = 'Platinum II'; badgeIcon = '💎';
+                        badgeTier = 'Platinum II'; badgeIcon = '2';
                     } else if (numLineups < 40) {
-                        badgeTier = 'Platinum III'; badgeIcon = '💎';
+                        badgeTier = 'Platinum III'; badgeIcon = '3';
                     } else if (numLineups < 42) {
-                        badgeTier = 'All-Star I'; badgeIcon = '⭐';
+                        badgeTier = 'All-Star I'; badgeIcon = '1';
                     } else if (numLineups < 44) {
-                        badgeTier = 'All-Star II'; badgeIcon = '⭐';
+                        badgeTier = 'All-Star II'; badgeIcon = '2';
                     } else if (numLineups < 46) {
-                        badgeTier = 'All-Star III'; badgeIcon = '⭐';
+                        badgeTier = 'All-Star III'; badgeIcon = '3';
                     } else if (numLineups < 48) {
-                        badgeTier = 'MVP I'; badgeIcon = '👑';
+                        badgeTier = 'MVP I'; badgeIcon = '1';
                     } else if (numLineups < 50) {
-                        badgeTier = 'MVP II'; badgeIcon = '👑';
+                        badgeTier = 'MVP II'; badgeIcon = '2';
                     } else if (numLineups < 52) {
-                        badgeTier = 'MVP III'; badgeIcon = '👑';
+                        badgeTier = 'MVP III'; badgeIcon = '3';
                     } else {
                         // Hall of Fame with infinite progression
                         const hallOfFameLevel = Math.floor((numLineups - 52) / 2) + 1;
-                        badgeTier = `Hall of Fame ${hallOfFameLevel}`; badgeIcon = '⚜️';
+                        badgeTier = `Hall of Fame ${hallOfFameLevel}`; badgeIcon = hallOfFameLevel.toString();
                     }
                 }
-                document.getElementById('stat-badge').innerHTML = `${badgeIcon} ${badgeTier}`;
+                // Create custom badge display with tier number
+                let badgeDisplay = '';
+                const tierNumber = badgeIcon;
+                
+                if (badgeTier.startsWith('Bronze')) {
+                    badgeDisplay = `<span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:24px;height:24px;background:linear-gradient(145deg,#CD7F32,#B8860B);border:2px solid #8B4513;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',cursive;font-size:10px;font-weight:bold;color:#000;text-shadow:none;box-shadow:0 2px 4px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.3);">${tierNumber}</span> ${badgeTier}</span>`;
+                } else if (badgeTier.startsWith('Silver')) {
+                    badgeDisplay = `<span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:24px;height:24px;background:linear-gradient(145deg,#C0C0C0,#A8A8A8);border:2px solid #696969;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',cursive;font-size:10px;font-weight:bold;color:#000;text-shadow:none;box-shadow:0 2px 4px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.3);">${tierNumber}</span> ${badgeTier}</span>`;
+                } else if (badgeTier.startsWith('Gold')) {
+                    badgeDisplay = `<span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:24px;height:24px;background:linear-gradient(145deg,#FFD700,#FFA500);border:2px solid #B8860B;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',cursive;font-size:10px;font-weight:bold;color:#000;text-shadow:none;box-shadow:0 2px 4px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.3);">${tierNumber}</span> ${badgeTier}</span>`;
+                } else if (badgeTier.startsWith('Platinum')) {
+                    badgeDisplay = `<span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:24px;height:24px;background:linear-gradient(145deg,#E5E4E2,#C0C0C0);border:2px solid #8B8B8B;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',cursive;font-size:10px;font-weight:bold;color:#000;text-shadow:none;box-shadow:0 2px 4px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.3);">${tierNumber}</span> ${badgeTier}</span>`;
+                } else if (badgeTier.startsWith('All-Star')) {
+                    badgeDisplay = `<span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:24px;height:24px;background:linear-gradient(145deg,#FF6B35,#FF4500);border:2px solid #8B0000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',cursive;font-size:10px;font-weight:bold;color:#FFF;text-shadow:1px 1px 1px rgba(0,0,0,0.8);box-shadow:0 2px 4px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.3);">${tierNumber}</span> ${badgeTier}</span>`;
+                } else if (badgeTier.startsWith('MVP')) {
+                    badgeDisplay = `<span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:24px;height:24px;background:linear-gradient(145deg,#FFD700,#FFA500);border:2px solid #B8860B;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',cursive;font-size:10px;font-weight:bold;color:#000;text-shadow:none;box-shadow:0 2px 4px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.3);">${tierNumber}</span> ${badgeTier}</span>`;
+                } else if (badgeTier.startsWith('Hall of Fame')) {
+                    badgeDisplay = `<span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:24px;height:24px;background:linear-gradient(145deg,#4A90E2,#2E5C8A);border:2px solid #1E3A5F;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',cursive;font-size:8px;font-weight:bold;color:#FFF;text-shadow:1px 1px 1px rgba(0,0,0,0.8);box-shadow:0 2px 4px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.3);">${tierNumber}</span> ${badgeTier}</span>`;
+                } else {
+                    badgeDisplay = `${badgeIcon} ${badgeTier}`;
+                }
+                document.getElementById('stat-badge').innerHTML = badgeDisplay;
             } else {
                 // Not logged in
                 const urlUsername = getProfileUsernameFromQuery();
@@ -954,56 +975,77 @@
             
             // Set badge tier based on number of lineups
             let badgeTier = 'Bronze I';
-            let badgeIcon = '🥉';
+            let badgeIcon = '1';
             if (userLineups && userLineups.length > 0) {
                 const dailyLineups = userLineups[0].daily_lineups || {};
                 const numLineups = Object.keys(dailyLineups).length;
                 
                 if (numLineups === 0) {
-                    badgeTier = 'Bronze I'; badgeIcon = '🥉';
+                    badgeTier = 'Bronze I'; badgeIcon = '1';
                 } else if (numLineups < 18) {
-                    badgeTier = 'Bronze I'; badgeIcon = '🥉';
+                    badgeTier = 'Bronze I'; badgeIcon = '1';
                 } else if (numLineups < 20) {
-                    badgeTier = 'Bronze II'; badgeIcon = '🥉';
+                    badgeTier = 'Bronze II'; badgeIcon = '2';
                 } else if (numLineups < 22) {
-                    badgeTier = 'Bronze III'; badgeIcon = '🥉';
+                    badgeTier = 'Bronze III'; badgeIcon = '3';
                 } else if (numLineups < 24) {
-                    badgeTier = 'Silver I'; badgeIcon = '🥈';
+                    badgeTier = 'Silver I'; badgeIcon = '1';
                 } else if (numLineups < 26) {
-                    badgeTier = 'Silver II'; badgeIcon = '🥈';
+                    badgeTier = 'Silver II'; badgeIcon = '2';
                 } else if (numLineups < 28) {
-                    badgeTier = 'Silver III'; badgeIcon = '🥈';
+                    badgeTier = 'Silver III'; badgeIcon = '3';
                 } else if (numLineups < 30) {
-                    badgeTier = 'Gold I'; badgeIcon = '🥇';
+                    badgeTier = 'Gold I'; badgeIcon = '1';
                 } else if (numLineups < 32) {
-                    badgeTier = 'Gold II'; badgeIcon = '🥇';
+                    badgeTier = 'Gold II'; badgeIcon = '2';
                 } else if (numLineups < 34) {
-                    badgeTier = 'Gold III'; badgeIcon = '🥇';
+                    badgeTier = 'Gold III'; badgeIcon = '3';
                 } else if (numLineups < 36) {
-                    badgeTier = 'Platinum I'; badgeIcon = '💎';
+                    badgeTier = 'Platinum I'; badgeIcon = '1';
                 } else if (numLineups < 38) {
-                    badgeTier = 'Platinum II'; badgeIcon = '💎';
+                    badgeTier = 'Platinum II'; badgeIcon = '2';
                 } else if (numLineups < 40) {
-                    badgeTier = 'Platinum III'; badgeIcon = '💎';
+                    badgeTier = 'Platinum III'; badgeIcon = '3';
                 } else if (numLineups < 42) {
-                    badgeTier = 'All-Star I'; badgeIcon = '⭐';
+                    badgeTier = 'All-Star I'; badgeIcon = '1';
                 } else if (numLineups < 44) {
-                    badgeTier = 'All-Star II'; badgeIcon = '⭐';
+                    badgeTier = 'All-Star II'; badgeIcon = '2';
                 } else if (numLineups < 46) {
-                    badgeTier = 'All-Star III'; badgeIcon = '⭐';
+                    badgeTier = 'All-Star III'; badgeIcon = '3';
                 } else if (numLineups < 48) {
-                    badgeTier = 'MVP I'; badgeIcon = '👑';
+                    badgeTier = 'MVP I'; badgeIcon = '1';
                 } else if (numLineups < 50) {
-                    badgeTier = 'MVP II'; badgeIcon = '👑';
+                    badgeTier = 'MVP II'; badgeIcon = '2';
                 } else if (numLineups < 52) {
-                    badgeTier = 'MVP III'; badgeIcon = '👑';
+                    badgeTier = 'MVP III'; badgeIcon = '3';
                 } else {
                     // Hall of Fame with infinite progression
                     const hallOfFameLevel = Math.floor((numLineups - 52) / 2) + 1;
-                    badgeTier = `Hall of Fame ${hallOfFameLevel}`; badgeIcon = '⚜️';
+                    badgeTier = `Hall of Fame ${hallOfFameLevel}`; badgeIcon = hallOfFameLevel.toString();
                 }
             }
-            document.getElementById('stat-badge').innerHTML = `${badgeIcon} ${badgeTier}`;
+            // Create custom badge display with tier number
+            let badgeDisplay = '';
+            const tierNumber = badgeIcon;
+            
+            if (badgeTier.startsWith('Bronze')) {
+                badgeDisplay = `<span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:24px;height:24px;background:linear-gradient(145deg,#CD7F32,#B8860B);border:2px solid #8B4513;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',cursive;font-size:10px;font-weight:bold;color:#000;text-shadow:none;box-shadow:0 2px 4px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.3);">${tierNumber}</span> ${badgeTier}</span>`;
+            } else if (badgeTier.startsWith('Silver')) {
+                badgeDisplay = `<span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:24px;height:24px;background:linear-gradient(145deg,#C0C0C0,#A8A8A8);border:2px solid #696969;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',cursive;font-size:10px;font-weight:bold;color:#000;text-shadow:none;box-shadow:0 2px 4px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.3);">${tierNumber}</span> ${badgeTier}</span>`;
+            } else if (badgeTier.startsWith('Gold')) {
+                badgeDisplay = `<span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:24px;height:24px;background:linear-gradient(145deg,#FFD700,#FFA500);border:2px solid #B8860B;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',cursive;font-size:10px;font-weight:bold;color:#000;text-shadow:none;box-shadow:0 2px 4px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.3);">${tierNumber}</span> ${badgeTier}</span>`;
+            } else if (badgeTier.startsWith('Platinum')) {
+                badgeDisplay = `<span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:24px;height:24px;background:linear-gradient(145deg,#E5E4E2,#C0C0C0);border:2px solid #8B8B8B;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',cursive;font-size:10px;font-weight:bold;color:#000;text-shadow:none;box-shadow:0 2px 4px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.3);">${tierNumber}</span> ${badgeTier}</span>`;
+            } else if (badgeTier.startsWith('All-Star')) {
+                badgeDisplay = `<span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:24px;height:24px;background:linear-gradient(145deg,#FF6B35,#FF4500);border:2px solid #8B0000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',cursive;font-size:10px;font-weight:bold;color:#FFF;text-shadow:1px 1px 1px rgba(0,0,0,0.8);box-shadow:0 2px 4px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.3);">${tierNumber}</span> ${badgeTier}</span>`;
+            } else if (badgeTier.startsWith('MVP')) {
+                badgeDisplay = `<span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:24px;height:24px;background:linear-gradient(145deg,#FFD700,#FFA500);border:2px solid #B8860B;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',cursive;font-size:10px;font-weight:bold;color:#000;text-shadow:none;box-shadow:0 2px 4px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.3);">${tierNumber}</span> ${badgeTier}</span>`;
+            } else if (badgeTier.startsWith('Hall of Fame')) {
+                badgeDisplay = `<span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:24px;height:24px;background:linear-gradient(145deg,#4A90E2,#2E5C8A);border:2px solid #1E3A5F;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',cursive;font-size:8px;font-weight:bold;color:#FFF;text-shadow:1px 1px 1px rgba(0,0,0,0.8);box-shadow:0 2px 4px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.3);">${tierNumber}</span> ${badgeTier}</span>`;
+            } else {
+                badgeDisplay = `${badgeIcon} ${badgeTier}`;
+            }
+            document.getElementById('stat-badge').innerHTML = badgeDisplay;
             
             document.getElementById('profile-loading-spinner').style.display = 'none';
             document.querySelector('.profile-container').style.visibility = 'visible';
@@ -1011,3 +1053,4 @@
     </script>
 </body>
 </html>
+
