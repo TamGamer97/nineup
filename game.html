@@ -1163,34 +1163,65 @@ https://cdn.jsdelivr.net/npm/dom-to-image@2.6.0/dist/dom-to-image.min.js
         // Load today's questions
         async function loadDailyQuestions() {
             try {
-                // Fetch all questions (no date filtering)
-                const { data, error } = await supabase
-                    .from('daily_questions')
-                    .select('*');
+                const today = new Date().toISOString().slice(0, 10);
 
-                if (error) {
-                    console.error('Error loading questions:', error);
-                    showError('Failed to load questions. Please try again.');
-                    return;
+                // Helper function to select today's questions
+                async function selectTodaysQuestions() {
+                    const { data, error } = await supabase
+                        .from('daily_questions')
+                        .select('*');
+
+                    if (error) {
+                        console.error('Error loading questions:', error);
+                        showError('Failed to load questions. Please try again.');
+                        return false;
+                    }
+
+                    // Check if there are already 9 questions with used_date === today
+                    const todaysQuestions = data.filter(q => q.used_date === today);
+                    if (todaysQuestions.length === 9) {
+                        currentQuestions = todaysQuestions;
+                        console.log('Questions for today (already set):', currentQuestions);
+                        showGameInterface();
+                        displayQuestion();
+                        return true;
+                    }
+
+                    // Otherwise, pick new questions as before
+                    let availableQuestions = data.filter(q => !q.used_date || q.used_date === today);
+                    const seed = hashStringToSeed(today);
+                    const shuffled = seededShuffle([...availableQuestions], seed);
+                    let pickedQuestions = shuffled.slice(0, 9);
+                    if (pickedQuestions.length < 9) {
+                        const unusedQuestions = data.filter(q => !q.used_date && !pickedQuestions.includes(q));
+                        for (let i = 0; pickedQuestions.length < 9 && i < unusedQuestions.length; i++) {
+                            pickedQuestions.push(unusedQuestions[i]);
+                        }
+                    }
+                    if (pickedQuestions.length < 9) {
+                        showError('Not enough unique questions available. Please try again later.');
+                        return false;
+                    }
+                    for (const q of pickedQuestions) {
+                        if (q.used_date !== today) {
+                            await supabase
+                                .from('daily_questions')
+                                .update({ used_date: today })
+                                .eq('id', q.id);
+                        }
+                    }
+                    // After setting, return false to indicate we need to re-run to pick up the now-set questions
+                    return false;
                 }
 
-                if (!data || data.length < 9) {
-                    showError('Not enough questions available. Please try again later.');
-                    return;
+                // Try up to 2 times: first to set, second to pick up the set questions
+                let done = await selectTodaysQuestions();
+                if (!done) {
+                    // Wait a moment to ensure DB updates are visible
+                    setTimeout(async () => {
+                        await selectTodaysQuestions();
+                    }, 200);
                 }
-
-                // Deterministic shuffle based on local date
-                const now = new Date();
-                const year = now.getFullYear();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const day = String(now.getDate()).padStart(2, '0');
-                const seedString = `${year}-${month}-${day}`;
-                const seed = hashStringToSeed(seedString);
-                const shuffled = seededShuffle([...data], seed);
-                currentQuestions = shuffled.slice(0, 9);
-                console.log('Questions for today:', currentQuestions);
-                showGameInterface();
-                displayQuestion();
             } catch (error) {
                 console.error('Error loading questions:', error);
                 showError('Failed to load questions. Please try again.');
