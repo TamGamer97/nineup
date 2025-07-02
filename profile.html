@@ -499,10 +499,71 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .side-ad {
+            position: fixed;
+            top: 80px;
+            width: 160px;
+            height: 600px;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .left-ad {
+            left: 0;
+        }
+        .right-ad {
+            right: 0;
+        }
+        .ad-placeholder {
+            width: 160px;
+            height: 600px;
+            background: #111;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            opacity: 0.85;
+        }
+        @media (max-width: 1200px) {
+            .side-ad {
+                display: none;
+            }
+        }
+        .ad-border {
+            border: 3px solid #111;
+            border-radius: 10px;
+            background: #fff;
+            padding: 8px;
+            box-sizing: border-box;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <!-- Google Analytics: Replace G-XXXXXXXXXX with your Measurement ID -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX'); // <-- Replace with your Measurement ID
+    </script>
 </head>
 <body>
+    <!-- Left Ad - Enter your AdSense client and slot keys below -->
+    <div class="side-ad left-ad ad-border">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=YOUR-ADSENSE-CLIENT-ID" crossorigin="anonymous"></script>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="YOUR-ADSENSE-CLIENT-ID" data-ad-slot="YOUR-AD-SLOT" data-ad-format="auto"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    <!-- Right Ad - Enter your AdSense client and slot keys below -->
+    <div class="side-ad right-ad ad-border">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=YOUR-ADSENSE-CLIENT-ID" crossorigin="anonymous"></script>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="YOUR-ADSENSE-CLIENT-ID" data-ad-slot="YOUR-AD-SLOT" data-ad-format="auto"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
