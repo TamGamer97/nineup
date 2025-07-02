@@ -591,12 +591,24 @@
                 // Calculate badge tier and number for this user
                 let badgeTier = 'Bronze |';
                 let badgeIcon = '1';
-                // Count total days played for this user
+                // Count total days played for this user (including referral bonuses)
                 let numLineups = 0;
                 if (userLineups) {
                     const ul = userLineups.find(u => u.username === entry.username);
                     if (ul && ul.daily_lineups) {
                         numLineups = Object.keys(ul.daily_lineups).length;
+                        
+                        // Count referral bonuses (each counts as +1 day)
+                        let referralBonuses = 0;
+                        for (const date in ul.daily_lineups) {
+                            const lineupArr = ul.daily_lineups[date];
+                            if (Array.isArray(lineupArr)) {
+                                referralBonuses += lineupArr.filter(player => player.is_referral_bonus).length;
+                            }
+                        }
+                        
+                        // Add referral bonuses to the lineup count
+                        numLineups += referralBonuses;
                     }
                 }
                 if (numLineups === 0) {

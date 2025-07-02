@@ -556,6 +556,22 @@
                 <span class="stat-label">Badge Tier</span>
             </div>
         </div>
+        
+        <!-- Referral Code Section -->
+        <div class="referral-section" style="margin: 32px 0; padding: 24px; background: repeating-linear-gradient(135deg, #fff8f0, #ffeaa7 40px, #fff8f0 80px, #ffeaa7 120px); border: 4px solid #2c3e50; box-shadow: 0 0 0 8px #ff6b35, 0 8px 32px rgba(44,62,80,0.13); border-radius: 0px;">
+            <div style="font-family: 'Press Start 2P', cursive; font-size: 1.2rem; color: #2c3e50; text-align: center; margin-bottom: 16px; text-shadow: 2px 2px 0 #ffeaa7;">Your Referral Code</div>
+            <div style="text-align: center; margin-bottom: 16px;">
+                <div id="referral-code-display" style="font-family: 'Press Start 2P', cursive; font-size: 1.5rem; color: #ff6b35; background: #2c3e50; padding: 12px 24px; border: 3px solid #ff6b35; border-radius: 0px; display: inline-block; text-shadow: 1px 1px 0 #ffeaa7; letter-spacing: 2px;">LOADING...</div>
+            </div>
+            <div style="text-align: center; font-family: 'Press Start 2P', cursive; font-size: 0.8rem; color: #2c3e50; line-height: 1.4;">
+                Share this code with friends!<br>
+                You get +1 day toward your badge for each friend who signs up with your code.
+            </div>
+            <div style="text-align: center; margin-top: 16px;">
+                <button id="copy-referral-btn" style="background: linear-gradient(135deg, #ff6b35, #f7931e); color: #fff; border: none; border-radius: 20px; padding: 10px 20px; font-family: 'Press Start 2P', cursive; font-size: 0.8rem; cursor: pointer; transition: transform 0.2s; margin-right: 10px;">Copy Code</button>
+                <button id="copy-link-btn" style="background: linear-gradient(135deg, #3498db, #2980b9); color: #fff; border: none; border-radius: 20px; padding: 10px 20px; font-family: 'Press Start 2P', cursive; font-size: 0.8rem; cursor: pointer; transition: transform 0.2s;">Copy Link</button>
+            </div>
+        </div>
         <div class="profile-lineup-section">
             <div class="lineup-title">Most Recent Lineup</div>
             <div class="retro-lineup-grid" id="lineup-players">
@@ -671,6 +687,53 @@
             }
         }
         
+        // Generate unique referral code
+        function generateReferralCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // Ensure all users have referral codes
+        async function ensureAllUsersHaveReferralCodes() {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return;
+                
+                // Check if current user has a referral code
+                const { data: userLineup, error } = await supabase
+                    .from('user_lineups')
+                    .select('referral_code')
+                    .eq('user_id', user.id)
+                    .single();
+                
+                if (error && error.code !== 'PGRST116') {
+                    console.error('Error checking referral code:', error);
+                    return;
+                }
+                
+                // If user exists but doesn't have a referral code, generate one
+                if (userLineup && !userLineup.referral_code) {
+                    const userReferralCode = generateReferralCode();
+                    const { error: updateError } = await supabase
+                        .from('user_lineups')
+                        .update({ referral_code: userReferralCode })
+                        .eq('user_id', user.id);
+                    
+                    if (updateError) {
+                        console.error('Error generating referral code:', updateError);
+                    } else {
+                        console.log('Generated referral code for user:', userReferralCode);
+                    }
+                }
+            } catch (err) {
+                console.error('Error ensuring referral codes:', err);
+            }
+        }
+
         // Helper: check if user exists (check against current user or valid format)
         async function checkUserExists(username) {
             try {
@@ -901,16 +964,69 @@
         document.addEventListener('DOMContentLoaded', async function() {
             document.getElementById('profile-loading-spinner').style.display = 'flex';
             document.querySelector('.profile-container').style.visibility = 'hidden';
+            
+            // Ensure all users have referral codes
+            await ensureAllUsersHaveReferralCodes();
             const supabaseUrl = 'https://nvgrzcarcxokdtbtqbtn.supabase.co';
             const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52Z3J6Y2FyY3hva2R0YnRxYnRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMTczMTUsImV4cCI6MjA2Njg5MzMxNX0._Ta2Uon4TQ9Uqr4nSJenlR32hJfHp41QX8w9A4bOLcU';
             const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
             const username = new URLSearchParams(window.location.search).get('user') || 'Player1';
             document.getElementById('profile-username').textContent = '@' + username;
+            // Get current user to check if this is their profile
+            const { data: { user: currentUser } } = await supabase.auth.getUser();
+            console.log('Current user:', currentUser);
+            console.log('Looking for username:', username);
+            
             // Fetch user_lineups for this username
             let { data: userLineups, error } = await supabase
                 .from('user_lineups')
-                .select('daily_lineups')
+                .select('daily_lineups, referral_code, user_id')
                 .eq('username', username);
+            
+            console.log('User lineups query result:', userLineups, error);
+            
+            // If not found by username, try by email (in case username is actually an email)
+            if ((!userLineups || userLineups.length === 0) && username.includes('@')) {
+                console.log('Trying to find user by email instead of username');
+                const { data: emailUserLineups, error: emailError } = await supabase
+                    .from('user_lineups')
+                    .select('daily_lineups, referral_code, user_id')
+                    .eq('username', username);
+                
+                if (emailUserLineups && emailUserLineups.length > 0) {
+                    console.log('Found user by email lookup');
+                    userLineups = emailUserLineups;
+                }
+            }
+            
+            // If no user_lineups record exists, user needs to play a game first
+            if (!userLineups || userLineups.length === 0) {
+                console.log('No user_lineups record found for username:', username);
+                console.log('User needs to play a game first to create their profile');
+            } else {
+                // User exists but check if they have a referral code
+                if (!userLineups[0].referral_code) {
+                    console.log('User exists but no referral code found, generating one...');
+                    const userReferralCode = generateReferralCode();
+                    
+                    try {
+                        const { error: updateError } = await supabase
+                            .from('user_lineups')
+                            .update({ referral_code: userReferralCode })
+                            .eq('user_id', userLineups[0].user_id);
+                        
+                        if (updateError) {
+                            console.error('Error updating referral code:', updateError);
+                        } else {
+                            console.log('Generated referral code for existing user:', userReferralCode);
+                            userLineups[0].referral_code = userReferralCode;
+                        }
+                    } catch (error) {
+                        console.error('Exception updating referral code:', error);
+                    }
+                }
+            }
+            
             let mostRecentLineup = [];
             let highScore = 0;
             if (userLineups && userLineups.length > 0) {
@@ -974,12 +1090,24 @@
             }
             document.getElementById('lineup-players').innerHTML = playerCardsHtml;
             
-            // Set badge tier based on number of lineups
+            // Set badge tier based on number of lineups (including referral bonuses)
             let badgeTier = 'Bronze I';
             let badgeIcon = '1';
             if (userLineups && userLineups.length > 0) {
                 const dailyLineups = userLineups[0].daily_lineups || {};
-                const numLineups = Object.keys(dailyLineups).length;
+                let numLineups = Object.keys(dailyLineups).length;
+                
+                // Count referral bonuses (each counts as +1 day)
+                let referralBonuses = 0;
+                for (const date in dailyLineups) {
+                    const lineupArr = dailyLineups[date];
+                    if (Array.isArray(lineupArr)) {
+                        referralBonuses += lineupArr.filter(player => player.is_referral_bonus).length;
+                    }
+                }
+                
+                // Add referral bonuses to the lineup count
+                numLineups += referralBonuses;
                 
                 if (numLineups === 0) {
                     badgeTier = 'Bronze I'; badgeIcon = '1';
@@ -1047,6 +1175,82 @@
                 badgeDisplay = `${badgeIcon} ${badgeTier}`;
             }
             document.getElementById('stat-badge').innerHTML = badgeDisplay;
+            
+            // Display referral code
+            console.log('Displaying referral code. User lineups:', userLineups);
+            if (userLineups && userLineups.length > 0 && userLineups[0].referral_code) {
+                console.log('User has referral code:', userLineups[0].referral_code);
+                document.getElementById('referral-code-display').textContent = userLineups[0].referral_code;
+                document.getElementById('copy-referral-btn').style.display = 'inline-block';
+                document.getElementById('copy-link-btn').style.display = 'inline-block';
+            } else {
+                console.log('No referral code found, showing generating state');
+                // Show loading state while we generate/retrieve the code
+                document.getElementById('referral-code-display').textContent = 'Generating...';
+                document.getElementById('copy-referral-btn').style.display = 'none';
+                document.getElementById('copy-link-btn').style.display = 'none';
+                
+                // If we have a user but no referral code, generate one
+                if (userLineups && userLineups.length > 0) {
+                    const userReferralCode = generateReferralCode();
+                    try {
+                        const { error: updateError } = await supabase
+                            .from('user_lineups')
+                            .update({ referral_code: userReferralCode })
+                            .eq('user_id', userLineups[0].user_id);
+                        
+                        if (updateError) {
+                            console.error('Error updating referral code:', updateError);
+                            document.getElementById('referral-code-display').textContent = 'Error';
+                        } else {
+                            console.log('Generated referral code for existing user:', userReferralCode);
+                            document.getElementById('referral-code-display').textContent = userReferralCode;
+                            document.getElementById('copy-referral-btn').style.display = 'inline-block';
+                            document.getElementById('copy-link-btn').style.display = 'inline-block';
+                        }
+                    } catch (error) {
+                        console.error('Exception updating referral code:', error);
+                        document.getElementById('referral-code-display').textContent = 'Error';
+                    }
+                } else {
+                    // No user record found - user needs to play a game first
+                    document.getElementById('referral-code-display').textContent = 'Play a game first to create a referral code';
+                    console.log('No user_lineups record found - user needs to play a game first');
+                }
+            }
+            
+            // Handle copy referral code button
+            document.getElementById('copy-referral-btn').addEventListener('click', function() {
+                const referralCode = document.getElementById('referral-code-display').textContent;
+                if (referralCode && referralCode !== 'Generating...' && referralCode !== 'Error' && referralCode !== 'Play a game first to create a referral code') {
+                    navigator.clipboard.writeText(referralCode).then(function() {
+                        const originalText = this.textContent;
+                        this.textContent = 'Copied!';
+                        this.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
+                        setTimeout(() => {
+                            this.textContent = originalText;
+                            this.style.background = 'linear-gradient(135deg, #ff6b35, #f7931e)';
+                        }, 2000);
+                    }.bind(this));
+                }
+            });
+            
+            // Handle copy referral link button
+            document.getElementById('copy-link-btn').addEventListener('click', function() {
+                const referralCode = document.getElementById('referral-code-display').textContent;
+                if (referralCode && referralCode !== 'Generating...' && referralCode !== 'Error' && referralCode !== 'Play a game first to create a referral code') {
+                    const referralLink = `${window.location.origin}/registration.html?ref=${referralCode}`;
+                    navigator.clipboard.writeText(referralLink).then(function() {
+                        const originalText = this.textContent;
+                        this.textContent = 'Copied!';
+                        this.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
+                        setTimeout(() => {
+                            this.textContent = originalText;
+                            this.style.background = 'linear-gradient(135deg, #3498db, #2980b9)';
+                        }, 2000);
+                    }.bind(this));
+                }
+            });
             
             document.getElementById('profile-loading-spinner').style.display = 'none';
             document.querySelector('.profile-container').style.visibility = 'visible';

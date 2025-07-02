@@ -1106,6 +1106,16 @@ https://cdn.jsdelivr.net/npm/dom-to-image@2.6.0/dist/dom-to-image.min.js
             const day = String(now.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
         }
+
+        // Generate unique referral code
+        function generateReferralCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
         
         // Check if user has completed today's questions
         async function checkDailyCompletion() {
@@ -1178,6 +1188,7 @@ https://cdn.jsdelivr.net/npm/dom-to-image@2.6.0/dist/dom-to-image.min.js
                 const seed = hashStringToSeed(seedString);
                 const shuffled = seededShuffle([...data], seed);
                 currentQuestions = shuffled.slice(0, 9);
+                console.log('Questions for today:', currentQuestions);
                 showGameInterface();
                 displayQuestion();
             } catch (error) {
@@ -1517,7 +1528,7 @@ https://cdn.jsdelivr.net/npm/dom-to-image@2.6.0/dist/dom-to-image.min.js
                 // Get current lineup data
                 const { data: lineupData, error: getError } = await supabase
                     .from('user_lineups')
-                    .select('daily_lineups')
+                    .select('daily_lineups, referral_code')
                     .eq('user_id', currentUser.id)
                     .single();
                 
@@ -1551,6 +1562,21 @@ https://cdn.jsdelivr.net/npm/dom-to-image@2.6.0/dist/dom-to-image.min.js
                     if (updateError) {
                         console.error('Error updating lineup:', updateError);
                     }
+                    
+                    // Check if user needs a referral code
+                    if (!lineupData.referral_code) {
+                        const userReferralCode = generateReferralCode();
+                        const { error: referralError } = await supabase
+                            .from('user_lineups')
+                            .update({ referral_code: userReferralCode })
+                            .eq('user_id', currentUser.id);
+                        
+                        if (referralError) {
+                            console.error('Error updating referral code:', referralError);
+                        } else {
+                            console.log('Generated referral code for existing user:', userReferralCode);
+                        }
+                    }
                 } else {
                     // Create new record
                     const { error: insertError } = await supabase
@@ -1558,7 +1584,8 @@ https://cdn.jsdelivr.net/npm/dom-to-image@2.6.0/dist/dom-to-image.min.js
                         .insert({
                             user_id: currentUser.id,
                             daily_lineups: currentLineups,
-                            username: currentUser.user_metadata?.display_name || currentUser.email
+                            username: currentUser.user_metadata?.display_name || currentUser.email,
+                            referral_code: generateReferralCode()
                         });
                     
                     if (insertError) {

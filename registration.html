@@ -217,6 +217,7 @@
             <input type="text" id="signup-username" placeholder="Username" required autocomplete="nickname">
             <input type="email" id="signup-email" placeholder="Email" required autocomplete="username">
             <input type="password" id="signup-password" placeholder="Password" required autocomplete="new-password">
+            <input type="text" id="signup-referral" placeholder="Referral Code (Optional)" autocomplete="off">
             <button type="submit" id="signup-btn"><span id="signup-btn-text">Sign Up</span><span class="spinner" id="signup-spinner" style="display:none;"></span></button>
             <div class="auth-message" id="signup-message"></div>
         </form>
@@ -255,6 +256,25 @@
 
         // Animate indicator on load
         setActiveForm(true);
+        
+        // Check for referral code in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const referralCode = urlParams.get('ref');
+        if (referralCode) {
+            document.getElementById('signup-referral').value = referralCode;
+            // Switch to signup form if referral code is present
+            setActiveForm(false);
+        }
+
+        // Generate unique referral code
+        function generateReferralCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
 
         // Auth logic
         if (supabase) {
@@ -288,7 +308,12 @@
                 const username = document.getElementById('signup-username').value;
                 const email = document.getElementById('signup-email').value;
                 const password = document.getElementById('signup-password').value;
+                const referralCode = document.getElementById('signup-referral').value.trim();
+                
                 try {
+                    // Generate a unique referral code for this user
+                    const userReferralCode = generateReferralCode();
+                    
                     const { error, data } = await supabase.auth.signUp({ 
                         email, 
                         password,
@@ -314,6 +339,55 @@
                         return;
                     }
                     if (data.user) {
+                        // Create user_lineups record for new user
+                        try {
+                            // Note: Referral tracking removed since referred_by column doesn't exist
+                            // Users can still enter referral codes for future implementation
+                            // const { error: lineupError } = await supabase
+                            //     .from('user_lineups')
+                            //     .insert({
+                            //         user_id: data.user.id,
+                            //         username: username,
+                            //         referral_code: userReferralCode,
+                            //         daily_lineups: {}
+                            //     });
+                            // if (lineupError) {
+                            //     console.error('Error creating user lineup:', lineupError);
+                            // }
+                            console.log('referal code logic')
+                            // --- Referral logic start ---
+                            if (referralCode) {
+                                // Search for the referrer's user_lineups by referral_code
+                                const { data: referrerRows, error: referrerError } = await supabase
+                                    .from('user_lineups')
+                                    .select('id, daily_lineups')
+                                    .eq('referral_code', referralCode)
+                                    .maybeSingle();
+                                if (referrerError) {
+                                    console.error('Error searching for referrer:', referrerError);
+                                } else if (referrerRows) {
+                                    const referrerId = referrerRows.id;
+                                    const referrerDailyLineups = referrerRows.daily_lineups || {};
+                                    // Add a new entry with the new user's username
+                                    const today = new Date().toISOString().slice(0, 10);
+                                    referrerDailyLineups[username] = { referred: true, date: today };
+                                    // Update the referrer's daily_lineups
+                                    const { error: updateError } = await supabase
+                                        .from('user_lineups')
+                                        .update({ daily_lineups: referrerDailyLineups })
+                                        .eq('id', referrerId);
+                                    if (updateError) {
+                                        console.error('Error updating referrer daily_lineups:', updateError);
+                                    }
+                                } else {
+                                    console.warn('No referrer found for referral code:', referralCode);
+                                }
+                            }
+                            // --- Referral logic end ---
+                        } catch (err) {
+                            console.error('Error handling referral:', err);
+                        }
+                        
                         document.getElementById('signup-message').textContent = 'Signup successful! Check your email for verification.';
                         setTimeout(() => {
                             setActiveForm(true);
