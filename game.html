@@ -1226,65 +1226,63 @@ https://cdn.jsdelivr.net/npm/dom-to-image@2.6.0/dist/dom-to-image.min.js
         // Load today's questions
         async function loadDailyQuestions() {
             try {
-                const today = new Date().toISOString().slice(0, 10);
+                const today = getTodayDate();
 
-                // Helper function to select today's questions
-                async function selectTodaysQuestions() {
-                    const { data, error } = await supabase
-                        .from('daily_questions')
-                        .select('*');
-
-                    if (error) {
-                        console.error('Error loading questions:', error);
-                        showError('Failed to load questions. Please try again.');
-                        return false;
-                    }
-
-                    // Check if there are already 9 questions with used_date === today
-                    const todaysQuestions = data.filter(q => q.used_date === today);
-                    if (todaysQuestions.length === 9) {
-                        currentQuestions = todaysQuestions;
-                        console.log('Questions for today (already set):', currentQuestions);
-                        showGameInterface();
-                        displayQuestion();
-                        return true;
-                    }
-
-                    // Otherwise, pick new questions as before
-                    let availableQuestions = data.filter(q => !q.used_date || q.used_date === today);
-                    const seed = hashStringToSeed(today);
-                    const shuffled = seededShuffle([...availableQuestions], seed);
-                    let pickedQuestions = shuffled.slice(0, 9);
-                    if (pickedQuestions.length < 9) {
-                        const unusedQuestions = data.filter(q => !q.used_date && !pickedQuestions.includes(q));
-                        for (let i = 0; pickedQuestions.length < 9 && i < unusedQuestions.length; i++) {
-                            pickedQuestions.push(unusedQuestions[i]);
-                        }
-                    }
-                    if (pickedQuestions.length < 9) {
-                        showError('Not enough unique questions available. Please try again later.');
-                        return false;
-                    }
-                    for (const q of pickedQuestions) {
-                        if (q.used_date !== today) {
-                            await supabase
-                                .from('daily_questions')
-                                .update({ used_date: today })
-                                .eq('id', q.id);
-                        }
-                    }
-                    // After setting, return false to indicate we need to re-run to pick up the now-set questions
-                    return false;
+                // 1. Check for 9 questions already set for today
+                let { data: allQuestions, error: allQuestionsError } = await supabase
+                    .from('daily_questions')
+                    .select('*');
+                if (allQuestionsError) {
+                    showError('Failed to load questions. Please try again.');
+                    return;
                 }
 
-                // Try up to 2 times: first to set, second to pick up the set questions
-                let done = await selectTodaysQuestions();
-                if (!done) {
-                    // Wait a moment to ensure DB updates are visible
-                    setTimeout(async () => {
-                        await selectTodaysQuestions();
-                    }, 200);
+                let todaysQuestions = allQuestions ? allQuestions.filter(q => q.used_date === today) : [];
+                if (todaysQuestions.length === 9) {
+                    currentQuestions = todaysQuestions;
+                    showGameInterface();
+                    displayQuestion();
+                    return;
                 }
+
+                // 2. Otherwise, pick 9 random unused questions (used_date is null, empty string, or single space)
+                let unusedQuestions = allQuestions ? allQuestions.filter(q => !q.used_date || q.used_date === '' || q.used_date === ' ') : [];
+                if (unusedQuestions.length < 9) {
+                    showError('Not enough unique questions available. Please try again later.');
+                    return;
+                }
+
+                // Shuffle and pick 9
+                const shuffled = unusedQuestions.sort(() => Math.random() - 0.5);
+                const pickedQuestions = shuffled.slice(0, 9);
+                const pickedIds = pickedQuestions.map(q => q.id);
+
+                // 3. Set their used_date to today
+                const { error: updateError } = await supabase
+                    .from('daily_questions')
+                    .update({ used_date: today })
+                    .in('id', pickedIds);
+
+                if (updateError) {
+                    showError('Failed to set questions for today. Please try again.');
+                    return;
+                }
+
+                // 4. Now fetch the 9 questions for today (to ensure consistency)
+                let { data: finalQuestions, error: finalError } = await supabase
+                    .from('daily_questions')
+                    .select('*')
+                    .eq('used_date', today);
+
+                if (finalError || finalQuestions.length !== 9) {
+                    showError('Failed to load today\'s questions after update. Please try again.');
+                    return;
+                }
+
+                currentQuestions = finalQuestions;
+                showGameInterface();
+                displayQuestion();
+
             } catch (error) {
                 console.error('Error loading questions:', error);
                 showError('Failed to load questions. Please try again.');
